@@ -6,10 +6,10 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 PROTECTED_ROUTES = [
-    "/api/v1/demand/current",
+    "/api/v1/forecast/hour",
     "/api/v1/faults/active",
-    "/api/v1/transformers/health",
-    "/api/v1/theft/suspects"
+    "/api/v1/transformers/critical",
+    "/api/v1/theft/suspicious"
 ]
 
 def test_auth_bypasses():
