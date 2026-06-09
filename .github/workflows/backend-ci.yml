@@ -28,13 +28,11 @@ jobs:
 
     - name: Run Authentication Security Tests
       env:
-        MONGODB_URL: ${{ secrets.MONGODB_URL }}
-        MONGODB_DB_NAME: powercortex_test_db
-        SECRET_KEY: test_secret_key_123
+        MONGODB_URL: mongodb://localhost:27017
+        DATABASE_NAME: powercortex_test_db
+        JWT_SECRET_KEY: test_secret_key_123
+        JWT_REFRESH_SECRET: test_refresh_key_123
         ALGORITHM: HS256
         ACCESS_TOKEN_EXPIRE_MINUTES: 30
-      # Start uvicorn in the background and run tests against it
       run: |
-        python -m uvicorn app.main:app --port 8000 &
-        sleep 5
         python tests/api_auth_test.py

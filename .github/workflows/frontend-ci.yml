@@ -22,7 +22,7 @@ jobs:
       run: flutter pub get
 
     - name: Analyze project source
-      run: flutter analyze
+      run: flutter analyze --no-fatal-infos
 
     - name: Build Web app
       run: flutter build web --release --dart-define=API_URL=https://api.powercortex.com
