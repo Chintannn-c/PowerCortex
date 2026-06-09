@@ -18,3 +18,7 @@ reportlab==4.2.2
 slowapi==0.1.9
 locust
 httpx
+pandas
+numpy
+scikit-learn
+joblib
