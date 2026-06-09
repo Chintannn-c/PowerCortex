@@ -1,0 +1,40 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Authentication Security Tests
+      env:
+        MONGODB_URL: ${{ secrets.MONGODB_URL }}
+        MONGODB_DB_NAME: powercortex_test_db
+        SECRET_KEY: test_secret_key_123
+        ALGORITHM: HS256
+        ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      # Start uvicorn in the background and run tests against it
+      run: |
+        python -m uvicorn app.main:app --port 8000 &
+        sleep 5
+        python tests/api_auth_test.py
