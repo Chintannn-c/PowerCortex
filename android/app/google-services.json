@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "94216345483",
+    "project_id": "power-cortex",
+    "storage_bucket": "power-cortex.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:94216345483:android:80e0258e1f231fdaf5418e",
+        "android_client_info": {
+          "package_name": "com.powercortex"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWA_40X7JwvAOF3-EuGVOkmyycKCQI5co"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

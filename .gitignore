@@ -1,0 +1,75 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# ── Backend / Python ──────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+*.egg
+
+# ── Secrets & Environment ─────────────────────────────────
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+
+# ── Test Artifacts ────────────────────────────────────────
+*.pdf
+backend/test_output_*
+
+# ── ML Model Artifacts (large binaries) ──────────────────
+*.keras
+*.h5
+*.pkl
+*.joblib
+
+# ── OS / Editor ──────────────────────────────────────────
+Thumbs.db
+*.bak
+*.tmp
+*.csv

@@ -1,0 +1,11 @@
+{
+    "model_name": "Theft_Detector_Real_SGCC_Optimized",
+    "feature_cols_count": 166,
+    "metrics": {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "roc_auc": 1.0
+    }
+}

@@ -1,0 +1,916 @@
+[
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\main.dart",
+    "name": "main.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 18,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 41,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Security",
+        "line": 45,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\core\\api\\api_client.dart",
+    "name": "api_client.dart",
+    "issues": [
+      {
+        "type": "Security",
+        "line": 38,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 38,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 40,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 53,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 53,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 66,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 66,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 75,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 79,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 113,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\core\\config\\app_config.dart",
+    "name": "app_config.dart",
+    "issues": [
+      {
+        "type": "Ghost Data",
+        "line": 14,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\core\\services\\notification_service.dart",
+    "name": "notification_service.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 50,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 112,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 116,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 121,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 138,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 145,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 161,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 165,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'dummy'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 175,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'dummy'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Security",
+        "line": 223,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 223,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 232,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 233,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 241,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 246,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 253,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 275,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 279,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 283,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 288,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 299,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 306,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 320,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 345,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 370,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 400,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 457,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 520,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 535,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 552,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'dummy'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 552,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 553,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'dummy'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 563,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'dummy'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\anomalies\\consumer_investigation_screen.dart",
+    "name": "consumer_investigation_screen.dart",
+    "issues": [
+      {
+        "type": "Ghost Data",
+        "line": 322,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'mock'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\anomalies\\fault_details_screen.dart",
+    "name": "fault_details_screen.dart",
+    "issues": [
+      {
+        "type": "Ghost Data",
+        "line": 46,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\anomalies\\fault_theft_screen.dart",
+    "name": "fault_theft_screen.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 248,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\assistant\\controllers\\assistant_controller.dart",
+    "name": "assistant_controller.dart",
+    "issues": [
+      {
+        "type": "Ghost Data",
+        "line": 33,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'seed'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\auth\\auth_controller.dart",
+    "name": "auth_controller.dart",
+    "issues": [
+      {
+        "type": "Security",
+        "line": 29,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 56,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 63,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 76,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 76,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 80,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 84,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 88,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 95,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 95,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 119,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 126,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 126,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 127,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 127,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 189,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'mock'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Security",
+        "line": 257,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 257,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 258,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 258,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 296,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 296,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 297,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 297,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 342,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 342,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\auth\\login_screen.dart",
+    "name": "login_screen.dart",
+    "issues": [
+      {
+        "type": "Security",
+        "line": 766,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 857,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 857,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\auth\\two_factor_setup_controller.dart",
+    "name": "two_factor_setup_controller.dart",
+    "issues": [
+      {
+        "type": "Ghost Data",
+        "line": 23,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Security",
+        "line": 57,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'secret'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 57,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\auth\\repositories\\auth_repository.dart",
+    "name": "auth_repository.dart",
+    "issues": [
+      {
+        "type": "Security",
+        "line": 79,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\dashboard\\dashboard_screen.dart",
+    "name": "dashboard_screen.dart",
+    "issues": [
+      {
+        "type": "Ghost Data",
+        "line": 124,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'fallback'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\forecasting\\forecasting_screen.dart",
+    "name": "forecasting_screen.dart",
+    "issues": [
+      {
+        "type": "Ghost Data",
+        "line": 365,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'generated'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\forecasting\\controllers\\forecast_controller.dart",
+    "name": "forecast_controller.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 71,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 95,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'generated'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 139,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'generated'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\home\\home_shell.dart",
+    "name": "home_shell.dart",
+    "issues": [
+      {
+        "type": "Security",
+        "line": 1386,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 1390,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\reports\\reports_screen.dart",
+    "name": "reports_screen.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 359,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 524,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'generated'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\reports\\repositories\\reports_repository.dart",
+    "name": "reports_repository.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 66,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\settings\\settings_screen.dart",
+    "name": "settings_screen.dart",
+    "issues": [
+      {
+        "type": "Security",
+        "line": 30,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 31,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 50,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'key'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 105,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 115,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 124,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      },
+      {
+        "type": "Security",
+        "line": 315,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'password'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\system_health\\system_health_screen.dart",
+    "name": "system_health_screen.dart",
+    "issues": [
+      {
+        "type": "Ghost Data",
+        "line": 442,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'heuristic'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 485,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'heuristic'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      },
+      {
+        "type": "Ghost Data",
+        "line": 552,
+        "severity": "Medium",
+        "issue": "Found ghost data keyword: 'random'",
+        "fix": "Verify if this is used in production. Remove or replace with real data sources."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\system_health\\controllers\\system_health_controller.dart",
+    "name": "system_health_controller.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 53,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\system_health\\models\\system_health_model.dart",
+    "name": "system_health_model.dart",
+    "issues": [
+      {
+        "type": "Security",
+        "line": 83,
+        "severity": "Critical",
+        "issue": "Potential hardcoded secret or unsecured HTTP: 'token'",
+        "fix": "Move to environment variables or secure vault. Use HTTPS."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\system_health\\services\\system_health_api_service.dart",
+    "name": "system_health_api_service.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 17,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 20,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      }
+    ]
+  },
+  {
+    "file": "c:\\Flutter\\guvnl_project\\lib\\features\\system_health\\services\\validation_api_service.dart",
+    "name": "validation_api_service.dart",
+    "issues": [
+      {
+        "type": "Performance/Bug",
+        "line": 17,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      },
+      {
+        "type": "Performance/Bug",
+        "line": 20,
+        "severity": "Low",
+        "issue": "Print statement left in code",
+        "fix": "Use debugPrint or a logging library."
+      }
+    ]
+  }
+]

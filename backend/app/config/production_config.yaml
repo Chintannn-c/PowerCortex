@@ -1,0 +1,51 @@
+# PowerCortex Master Production Configuration
+# Contains global overrides for thresholds and behavior
+
+forecasting:
+  grid_baseline_demand_mw: 30000.0
+  grid_peak_demand_mw: 42116.0
+  grid_min_demand_mw: 20000.0
+  grid_max_demand_mw: 50000.0
+
+renewable:
+  regions:
+    gujarat:
+      ahmedabad:
+        solar_capacity_mw: 5000.0
+        wind_capacity_mw: 2000.0
+      surat:
+        solar_capacity_mw: 4000.0
+        wind_capacity_mw: 1500.0
+      rajkot:
+        solar_capacity_mw: 3500.0
+        wind_capacity_mw: 2500.0
+    maharashtra:
+      mumbai:
+        solar_capacity_mw: 6000.0
+        wind_capacity_mw: 1000.0
+      pune:
+        solar_capacity_mw: 4500.0
+        wind_capacity_mw: 3000.0
+  wind_cut_in_speed: 3.5
+  wind_cut_out_speed: 25.0
+
+fault_detection:
+  frequency_low_threshold: 48.8
+  frequency_high_threshold: 51.2
+  voltage_sag_threshold: 195.0
+  voltage_swell_threshold: 245.0
+  short_circuit_voltage: 85.0
+  equipment_failure_current: 500.0
+
+theft_detection:
+  high_risk_threshold: 90
+  medium_risk_threshold: 70
+  low_risk_threshold: 50
+  notification_threshold: 85
+
+transformer:
+  healthy_threshold: 80
+  warning_threshold: 50
+  critical_temperature: 95
+  warning_temperature: 85
+  overload_percentage: 95

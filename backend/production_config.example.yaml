@@ -1,0 +1,47 @@
+# PowerCortex Production Configuration
+# Copy this file to `production_config.yaml` in your deployment environment
+# and customize thresholds according to physical grid specifications.
+#
+# Values here override the defaults in `app/core/grid_constants.py`.
+
+# ── Grid Demand Baselines ──────────────────────────────────────
+grid_baseline_demand_mw: 41134.0
+grid_peak_demand_mw: 42116.0
+grid_min_demand_mw: 28000.0
+grid_max_demand_mw: 48000.0
+heuristic_fallback_demand_mw: 30000.0
+
+# ── Renewable Capacity Limits ─────────────────────────────────
+solar_max_capacity_mw: 1200.0
+wind_max_capacity_mw: 500.0
+wind_cut_in_speed_ms: 3.0
+wind_cut_out_speed_ms: 25.0
+
+# ── Fault Detection Thresholds ────────────────────────────────
+frequency_low_threshold: 48.8
+frequency_high_threshold: 51.2
+voltage_sag_threshold: 195.0
+voltage_swell_threshold: 245.0
+short_circuit_voltage: 100.0
+short_circuit_combo_voltage: 160.0
+short_circuit_combo_current: 350.0
+equipment_failure_current: 500.0
+equipment_failure_voltage: 50.0
+
+# Fault Severity Confidence Boundaries
+fault_critical_threshold: 90.0
+fault_high_threshold: 75.0
+fault_medium_threshold: 50.0
+
+# ── Theft Detection Thresholds ────────────────────────────────
+theft_high_risk_pct: 90.0
+theft_medium_risk_pct: 70.0
+theft_low_risk_pct: 50.0
+theft_notification_threshold: 85.0
+
+# ── Transformer Health Thresholds ─────────────────────────────
+transformer_healthy_threshold: 80.0
+transformer_warning_threshold: 50.0
+transformer_critical_temperature: 85.0
+transformer_warning_temperature: 75.0
+transformer_overload_percentage: 95.0
