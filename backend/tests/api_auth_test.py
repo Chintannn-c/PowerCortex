@@ -1,3 +1,4 @@
+import sys
 import httpx
 import asyncio
 
@@ -16,6 +17,7 @@ async def test_auth_bypasses():
     a JWT returns a strict 401 Unauthorized or 403 Forbidden.
     """
     print("🚀 Starting API Authentication Bypass Audit...")
+    failed = False
     async with httpx.AsyncClient() as client:
         for route in PROTECTED_ROUTES:
             url = f"{BASE_URL}{route}"
@@ -25,8 +27,13 @@ async def test_auth_bypasses():
                     print(f"✅ PASSED (Secured): {route} returned {response.status_code}")
                 else:
                     print(f"❌ FAILED (Vulnerable!): {route} returned {response.status_code} without auth token!")
+                    failed = True
             except httpx.ConnectError:
                 print(f"⚠️ SKIPPED: Could not connect to {url}. Is the server running?")
+                failed = True
+                
+    if failed:
+        sys.exit(1)
 
 if __name__ == "__main__":
     asyncio.run(test_auth_bypasses())
