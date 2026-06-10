@@ -6,6 +6,8 @@ class UserModel {
   final bool isActive;
   final bool isVerified;
   final bool twoFactorEnabled;
+  final bool pushNotifications;
+  final bool emailAlerts;
   final String createdAt;
   final String updatedAt;
 
@@ -17,6 +19,8 @@ class UserModel {
     required this.isActive,
     required this.isVerified,
     required this.twoFactorEnabled,
+    required this.pushNotifications,
+    required this.emailAlerts,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -30,6 +34,8 @@ class UserModel {
       isActive: json['is_active'] ?? true,
       isVerified: json['is_verified'] ?? false,
       twoFactorEnabled: json['two_factor_enabled'] ?? false,
+      pushNotifications: json['push_notifications'] ?? true,
+      emailAlerts: json['email_alerts'] ?? false,
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
     );
@@ -44,6 +50,8 @@ class UserModel {
       'is_active': isActive,
       'is_verified': isVerified,
       'two_factor_enabled': twoFactorEnabled,
+      'push_notifications': pushNotifications,
+      'email_alerts': emailAlerts,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };

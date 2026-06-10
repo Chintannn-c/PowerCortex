@@ -30,19 +30,19 @@ class TestFaultDetection(unittest.TestCase):
         # 0: Voltage Sag, 1: Overload, 2: Line Fault, 3: Voltage Swell
         
         # Test Voltage Sag prediction
-        label, prob = ModelLoader.predict_fault(180.0, 15.0, 50.0)
+        label, prob, source = ModelLoader.predict_fault(180.0, 15.0, 50.0)
         self.assertIn(label, [0, 1, 2, 3])
         self.assertTrue(0.0 <= prob <= 100.0)
         print(f"Voltage Sag test prediction: Label={label}, Probability={prob:.2f}%")
 
         # Test Overload prediction (Amperes scaled dynamically by /10)
-        label, prob = ModelLoader.predict_fault(220.0, 480.0, 50.0)
+        label, prob, source = ModelLoader.predict_fault(220.0, 480.0, 50.0)
         self.assertIn(label, [0, 1, 2, 3])
         self.assertTrue(0.0 <= prob <= 100.0)
         print(f"Overload test prediction: Label={label}, Probability={prob:.2f}%")
 
         # Test Swell prediction
-        label, prob = ModelLoader.predict_fault(260.0, 10.0, 50.0)
+        label, prob, source = ModelLoader.predict_fault(260.0, 10.0, 50.0)
         self.assertIn(label, [0, 1, 2, 3])
         self.assertTrue(0.0 <= prob <= 100.0)
         print(f"Voltage Swell test prediction: Label={label}, Probability={prob:.2f}%")

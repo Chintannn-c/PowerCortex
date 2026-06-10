@@ -98,10 +98,14 @@ class NotificationService:
         if data.user_id:
             user = await db.users.find_one({"_id": ObjectId(data.user_id)})
             if user and "fcm_tokens" in user:
-                target_tokens.extend(user["fcm_tokens"])
+                if user.get("push_notifications", True):
+                    target_tokens.extend(user["fcm_tokens"])
         else:
             # Broadcast to all users
-            async for u in db.users.find({"fcm_tokens": {"$exists": True, "$not": {"$size": 0}}}):
+            async for u in db.users.find({
+                "fcm_tokens": {"$exists": True, "$not": {"$size": 0}},
+                "push_notifications": {"$ne": False}
+            }):
                 target_tokens.extend(u.get("fcm_tokens", []))
 
         # 4. Broadcast via WebSockets

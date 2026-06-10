@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../two_factor_setup_controller.dart';
+import 'package:shimmer/shimmer.dart';
 
 class TwoFactorSetupScreen extends StatelessWidget {
   TwoFactorSetupScreen({super.key});
@@ -34,8 +35,9 @@ class TwoFactorSetupScreen extends StatelessWidget {
               }
 
               if (controller.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryBlue),
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 36.0, vertical: 32.0),
+                  child: _buildSkeletonLoader(isDark),
                 );
               }
 
@@ -56,6 +58,114 @@ class TwoFactorSetupScreen extends StatelessWidget {
             }),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonLoader(bool isDark) {
+    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
+    
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Title skeleton
+          Center(
+            child: Container(
+              height: 28,
+              width: 200,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Description skeleton (2 lines)
+          Center(
+            child: Container(
+              height: 14,
+              width: 280,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Center(
+            child: Container(
+              height: 14,
+              width: 220,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          
+          // Subtitle skeleton
+          Container(
+            height: 14,
+            width: 80,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 8),
+          
+          // OTP Boxes skeleton
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(6, (index) {
+              return Container(
+                width: 45,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 24),
+          
+          // Timer skeleton
+          Center(
+            child: Container(
+              height: 14,
+              width: 140,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 48),
+          
+          // Buttons skeleton
+          Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ],
       ),
     );
   }

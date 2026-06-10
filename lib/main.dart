@@ -10,6 +10,7 @@ import 'features/home/home_shell.dart';
 import 'features/auth/screens/two_factor_setup_screen.dart';
 import 'features/anomalies/fault_details_screen.dart';
 import 'features/anomalies/consumer_investigation_screen.dart';
+import 'features/settings/help_support_screen.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -88,6 +89,7 @@ class PowerCortexApp extends StatelessWidget {
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeShell(),
         '/settings/2fa': (context) => TwoFactorSetupScreen(),
+        '/settings/help': (context) => const HelpSupportScreen(),
         '/fault-details': (context) => const FaultDetailsScreen(),
         '/consumer-investigation': (context) => const ConsumerInvestigationScreen(),
       },

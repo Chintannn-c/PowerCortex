@@ -28,14 +28,14 @@ class TestTheftDetection(unittest.TestCase):
     def test_model_inference(self):
         """Test Isolation Forest inference method with various inputs."""
         # Test normal consumption
-        prob, is_suspicious, deviation = ModelLoader.predict_theft(1000.0, 1000.0, 0.95)
+        prob, is_suspicious, deviation, source = ModelLoader.predict_theft(1000.0, 1000.0, 0.95)
         self.assertFalse(is_suspicious)
         self.assertTrue(0.0 <= prob < 50.0)
         self.assertEqual(deviation, 0.0)
         print(f"Normal consumption prediction: Prob={prob}%, Suspicious={is_suspicious}, Deviation={deviation}%")
 
         # Test anomaly consumption (large drop in consumption)
-        prob, is_suspicious, deviation = ModelLoader.predict_theft(100.0, 1200.0, 0.50)
+        prob, is_suspicious, deviation, source = ModelLoader.predict_theft(100.0, 1200.0, 0.50)
         self.assertTrue(is_suspicious)
         self.assertTrue(50.0 <= prob <= 100.0)
         self.assertTrue(deviation < -50.0)

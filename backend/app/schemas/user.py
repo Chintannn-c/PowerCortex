@@ -18,6 +18,8 @@ class UserResponse(BaseModel):
     department: str
     is_active: bool
     is_verified: bool
+    push_notifications: bool = True
+    email_alerts: bool = False
     created_at: str
     updated_at: str
 
@@ -27,5 +29,7 @@ class UserUpdateRequest(BaseModel):
 
     full_name: Optional[str] = Field(None, min_length=2, max_length=100)
     department: Optional[str] = Field(None, max_length=100)
+    push_notifications: Optional[bool] = None
+    email_alerts: Optional[bool] = None
     is_active: Optional[bool] = None
     is_verified: Optional[bool] = None

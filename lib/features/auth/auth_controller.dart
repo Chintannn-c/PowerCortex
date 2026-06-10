@@ -380,6 +380,29 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> updatePreferences(bool push, bool email) async {
+    final user = currentUser.value;
+    if (user == null) return;
+
+    final result = await _authRepository.updateUser(user.id, {
+      'push_notifications': push,
+      'email_alerts': email,
+    });
+
+    if (result['success'] == true) {
+      await checkAuthStatus(); // Refresh current user data silently
+    } else {
+      Get.snackbar(
+        'Update Failed',
+        result['message'] ?? 'Failed to save preferences.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.critical,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+    }
+  }
+
   Future<void> changePassword(String currentPassword, String newPassword) async {
     isLoading.value = true;
     final result = await _authRepository.changePassword(currentPassword, newPassword);

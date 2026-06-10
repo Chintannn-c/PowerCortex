@@ -15,6 +15,7 @@ import '../../widgets/status_chip.dart';
 import 'dashboard_skeleton.dart';
 import '../anomalies/controllers/fault_controller.dart';
 import '../anomalies/controllers/theft_controller.dart';
+import '../insights/insights_controller.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -27,6 +28,7 @@ class DashboardScreen extends StatelessWidget {
     final TransformerController transformerController = Get.put(TransformerController());
     final FaultController faultController = Get.put(FaultController());
     Get.put(TheftController());
+    final InsightsController insightsController = Get.put(InsightsController());
 
     return Obx(() {
       if (controller.isLoading.value) {
@@ -151,9 +153,33 @@ class DashboardScreen extends StatelessWidget {
             context.sh(16),
 
             // AI Insights
-            Text('AI Insights', style: theme.textTheme.labelLarge),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    if (HomeShell.of(context) != null) {
+                      HomeShell.of(context)!.navigateTo(8);
+                    } else if (Get.isRegistered<HomeShellState>()) {
+                      Get.find<HomeShellState>().navigateTo(8);
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    alignment: Alignment.centerLeft,
+                  ),
+                  child: Row(
+                    children: [
+                      Text('AI Insights', style: theme.textTheme.labelLarge?.copyWith(color: AppColors.primaryBlue)),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.primaryBlue),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             context.sh(10),
-            _buildInsightsList(context, summaryData),
+            Obx(() => _buildInsightsList(context, summaryData, insightsController)),
             context.sh(20),
 
             // KPI Cards Grid
@@ -183,30 +209,54 @@ class DashboardScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildInsightsList(BuildContext context, DashboardSummary summaryData) {
+  Widget _buildInsightsList(BuildContext context, DashboardSummary summaryData, InsightsController insightsCtrl) {
     final insights = summaryData.insights;
     final cards = <Widget>[];
     
     // 1. Dynamic ML demand insights
-    for (var i = 0; i < insights.length; i++) {
-      IconData icon = Icons.lightbulb_outline_rounded;
-      Color color = AppColors.warning;
-      
-      if (insights[i].contains("temperature") || insights[i].contains("weather")) {
-        icon = Icons.wb_sunny;
-        color = AppColors.info;
-      } else if (insights[i].contains("Elevated load") || insights[i].contains("reserves")) {
-        icon = Icons.trending_up;
-        color = AppColors.critical;
+    if (insightsCtrl.aggregatedInsights.isNotEmpty) {
+      for (var insight in insightsCtrl.aggregatedInsights) {
+        IconData icon = Icons.lightbulb_outline_rounded;
+        Color color = AppColors.warning;
+        final text = insight['text'] as String? ?? '';
+        
+        if (text.contains("temperature") || text.contains("weather")) {
+          icon = Icons.wb_sunny;
+          color = AppColors.info;
+        } else if (text.contains("Elevated load") || text.contains("reserves")) {
+          icon = Icons.trending_up;
+          color = AppColors.critical;
+        }
+        
+        cards.add(_insightCard(
+          context,
+          icon,
+          text,
+          insight['type'] as String? ?? 'Demand Insight',
+          color,
+        ));
       }
-      
-      cards.add(_insightCard(
-        context,
-        icon,
-        insights[i],
-        'Demand Insight',
-        color,
-      ));
+    } else {
+      for (var i = 0; i < insights.length; i++) {
+        IconData icon = Icons.lightbulb_outline_rounded;
+        Color color = AppColors.warning;
+        
+        if (insights[i].contains("temperature") || insights[i].contains("weather")) {
+          icon = Icons.wb_sunny;
+          color = AppColors.info;
+        } else if (insights[i].contains("Elevated load") || insights[i].contains("reserves")) {
+          icon = Icons.trending_up;
+          color = AppColors.critical;
+        }
+        
+        cards.add(_insightCard(
+          context,
+          icon,
+          insights[i],
+          'Demand Insight',
+          color,
+        ));
+      }
     }
     
     // 2. Live fault detection insight cards

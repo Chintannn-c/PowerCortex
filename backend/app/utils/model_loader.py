@@ -593,34 +593,44 @@ class ModelLoader:
 
     @classmethod
     def load_theft_model(cls) -> None:
-        """Loads the Isolation Forest theft detection model once at startup."""
+        """Loads the Keras Autoencoder theft detection model once at startup."""
         if cls._theft_model is not None:
             return
             
         import pickle
+        import json
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        model_path = os.path.join(base_dir, "models", "theft_detection_model.pkl")
+        model_path = os.path.join(base_dir, "models", "theft_detection_model.keras")
         scaler_path = os.path.join(base_dir, "models", "theft_scaler.pkl")
+        threshold_path = os.path.join(base_dir, "models", "theft_threshold.json")
         
-        logger.info(f"Checking for theft detection model at {model_path}...")
+        logger.info(f"Checking for theft detection Keras model at {model_path}...")
         if os.path.exists(model_path) and os.path.exists(scaler_path):
             try:
-                with open(model_path, 'rb') as f:
-                    cls._theft_model = pickle.load(f)
+                import tensorflow as tf
+                cls._theft_model = tf.keras.models.load_model(model_path)
                 with open(scaler_path, 'rb') as f:
                     cls._theft_scaler = pickle.load(f)
-                logger.info("Theft detection model and scaler loaded successfully.")
+                
+                cls._theft_threshold = 0.5  # fallback
+                if os.path.exists(threshold_path):
+                    with open(threshold_path, 'r') as f:
+                        meta = json.load(f)
+                        cls._theft_threshold = meta.get("mse_threshold", 0.5)
+                        
+                logger.info("Theft detection Keras Autoencoder and scaler loaded successfully.")
             except Exception as e:
-                logger.exception("Failed to load theft detection model.")
+                logger.exception("Failed to load theft detection Keras model.")
                 cls._theft_model = None
                 cls._theft_scaler = None
+                cls._theft_threshold = None
         else:
             logger.warning("Theft detection model or scaler files not found.")
 
     @classmethod
     def predict_theft(cls, current_consumption: float, avg_consumption: float, power_factor: float) -> tuple[float, bool, float, str]:
         """
-        Runs inference using Isolation Forest to predict theft probability, suspicion state, and deviation percentage.
+        Runs inference using Keras Autoencoder to predict theft probability, suspicion state, and deviation percentage.
         Returns: tuple[theft_probability: float, is_suspicious: bool, deviation_percentage: float]
         """
         # Calculate deviation percentage: ((current_consumption - avg_consumption) / avg_consumption) * 100
@@ -640,30 +650,33 @@ class ModelLoader:
             
         if cls._theft_model is not None and cls._theft_scaler is not None:
             try:
+                import tensorflow as tf
                 features = np.array([[current_consumption, avg_consumption, power_factor, deviation]])
                 scaled_features = cls._theft_scaler.transform(features)
                 
-                # predict returns 1 for normal, -1 for anomaly/theft
-                pred = cls._theft_model.predict(scaled_features)[0]
+                # Autoencoder reconstructs the input
+                pred_features = cls._theft_model(tf.convert_to_tensor(scaled_features, dtype=tf.float32), training=False).numpy()
                 
-                # decision_function returns anomaly score (negative values are outliers)
-                score = cls._theft_model.decision_function(scaled_features)[0]
+                # Calculate Mean Squared Error (MSE) reconstruction loss
+                mse_loss = float(np.mean(np.power(scaled_features - pred_features, 2), axis=1)[0])
+                threshold = getattr(cls, '_theft_threshold', 0.5)
                 
-                # Convert Isolation Forest decision score to a nice probability percentage
-                if pred == -1:
+                if mse_loss > threshold:
                     is_suspicious = True
-                    # Scale to 70% to 98%
-                    prob_val = 70.0 + (abs(score) * 40.0)
-                    probability = min(98.5, max(70.0, prob_val))
+                    # Scale loss to probability between 60% and 99%
+                    ratio = min(mse_loss / threshold, 3.0)  # cap at 3x threshold
+                    prob_val = 60.0 + ((ratio - 1.0) / 2.0) * 39.0
+                    probability = min(99.0, max(60.0, prob_val))
                 else:
                     is_suspicious = False
-                    # Scale to 5% to 49%
-                    prob_val = 45.0 - (score * 50.0)
-                    probability = min(49.9, max(5.0, prob_val))
+                    # Scale loss to probability between 5% and 49%
+                    ratio = mse_loss / threshold
+                    prob_val = 5.0 + (ratio * 44.0)
+                    probability = min(49.0, max(5.0, prob_val))
                     
-                return round(probability, 1), is_suspicious, deviation, SOURCE_ISOLATION_FOREST
+                return round(probability, 1), is_suspicious, deviation, SOURCE_KERAS_MLP_MODEL
             except Exception as e:
-                logger.exception("Isolation Forest theft prediction failed.")
+                logger.exception("Keras Autoencoder theft prediction failed.")
                 if not settings.ALLOW_MODEL_FALLBACKS:
                     raise ModelUnavailableError("Theft detection model inference failed and heuristic fallback is disabled.") from e
                 

@@ -25,16 +25,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
-  Future<void> _loadSettings() async {
-    const storage = FlutterSecureStorage();
-    final pushStr = await storage.read(key: 'push_notifications');
-    final emailStr = await storage.read(key: 'email_alerts');
+  void _loadSettings() {
+    final user = Get.find<AuthController>().currentUser.value;
     setState(() {
-      if (pushStr != null) {
-        _pushNotifications = pushStr == 'true';
-      }
-      if (emailStr != null) {
-        _emailAlerts = emailStr == 'true';
+      if (user != null) {
+        _pushNotifications = user.pushNotifications;
+        _emailAlerts = user.emailAlerts;
       }
     });
   }
@@ -279,10 +275,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: const Text('Receive real-time alerts'),
                   secondary: _iconBox(Icons.notifications_active),
                   value: _pushNotifications,
-                  onChanged: (v) async {
+                  onChanged: (v) {
                     setState(() => _pushNotifications = v);
-                    const storage = FlutterSecureStorage();
-                    await storage.write(key: 'push_notifications', value: v.toString());
+                    Get.find<AuthController>().updatePreferences(v, _emailAlerts);
                   },
                   activeColor: AppColors.primaryBlue,
                 ),
@@ -292,10 +287,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: const Text('Daily summary emails'),
                   secondary: _iconBox(Icons.email),
                   value: _emailAlerts,
-                  onChanged: (v) async {
+                  onChanged: (v) {
                     setState(() => _emailAlerts = v);
-                    const storage = FlutterSecureStorage();
-                    await storage.write(key: 'email_alerts', value: v.toString());
+                    Get.find<AuthController>().updatePreferences(_pushNotifications, v);
                   },
                   activeColor: AppColors.primaryBlue,
                 ),
@@ -363,7 +357,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: _iconBox(Icons.help_outline),
                   title: const Text('Help & Support'),
                   trailing: const Icon(Icons.chevron_right, size: 20),
-                  onTap: () {},
+                  onTap: () {
+                    Get.toNamed('/settings/help');
+                  },
                 ),
                 const Divider(height: 1),
                 ListTile(

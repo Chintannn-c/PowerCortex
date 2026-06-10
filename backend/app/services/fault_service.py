@@ -104,8 +104,8 @@ class FaultDetectionService:
                     voltage=voltage,
                     current=current,
                     frequency=frequency,
-                    predicted_fault=fault_type,
-                    ml_prob=probability
+                    predicted_fault=pred_label,
+                    dl_prob=probability
                 )
                 agreement_score = val_res.get("agreement_score", 100.0)
                 if agreement_score < 80.0:

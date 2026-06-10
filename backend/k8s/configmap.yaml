@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: powercortex-config
+  namespace: powercortex-prod
+data:
+  ENVIRONMENT: "production"
+  MONGODB_URI: "mongodb://mongodb:27017/powercortex"
+  ALLOW_MODEL_FALLBACKS: "false"
+  CORS_ORIGINS: "[\"https://powercortex.guvnl.gov.in\"]"
+  GOOGLE_CLOUD_PROJECT: "guvnl-powercortex-production"

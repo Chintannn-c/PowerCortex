@@ -106,7 +106,7 @@ class TestDataValidationLayer(unittest.TestCase):
                 current=10.0,
                 frequency=50.0,
                 predicted_fault="Voltage Sag",
-                ml_prob=95.0
+                dl_prob=92.0
             )
         )
         self.assertFalse(res["rule_validation"])
@@ -119,7 +119,7 @@ class TestDataValidationLayer(unittest.TestCase):
                 current=30.0, # > 25A
                 frequency=50.0,
                 predicted_fault="Overload",
-                ml_prob=92.0
+                dl_prob=95.0
             )
         )
         self.assertTrue(res_overload["rule_validation"])

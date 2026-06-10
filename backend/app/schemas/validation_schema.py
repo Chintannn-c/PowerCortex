@@ -17,7 +17,7 @@ class RenewableValidationResponse(BaseModel):
 
 class FaultValidationResponse(BaseModel):
     fault_type: str
-    ml_probability: float
+    dl_probability: float
     rule_validation: bool
     confidence: float
     notes: Optional[str] = None

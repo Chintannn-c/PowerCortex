@@ -181,7 +181,7 @@ class ValidationService:
         await self.save_validation_log("renewable_forecasting", "renewable_last", confidence, validated, validation_sources, res)
         return res
 
-    async def validate_fault_detection(self, voltage: float, current: float, frequency: float, predicted_fault: str, ml_prob: float) -> Dict[str, Any]:
+    async def validate_fault_detection(self, voltage: float, current: float, frequency: float, predicted_fault: str, dl_prob: float) -> Dict[str, Any]:
         """
         Validate fault prediction using physical grid rules and multi-model consensus.
         """
@@ -216,14 +216,14 @@ class ValidationService:
         )
         
         agreement_score = consensus_data["agreement_score"]
-        confidence = (ml_prob + agreement_score) / 2.0
+        confidence = (dl_prob + agreement_score) / 2.0
         
         if agreement_score < 80.0:
-            notes_list.append(f"Ensemble consensus is low ({agreement_score}%). XGBoost/LightGBM predictions disagree.")
+            notes_list.append(f"Ensemble consensus is low ({agreement_score}%). Deep Learning Keras predictions disagree with physical bounds.")
             
         res = {
             "fault_type": predicted_fault,
-            "ml_probability": round(ml_prob, 2),
+            "dl_probability": round(dl_prob, 2),
             "rule_validation": rule_validation,
             "confidence": round(confidence, 2),
             "agreement_score": round(agreement_score, 2),
