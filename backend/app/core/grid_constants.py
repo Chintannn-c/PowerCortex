@@ -37,8 +37,8 @@ def _get_val(key: str, default_val: float) -> float:
     if val is not None:
         try:
             return float(val)
-        except (ValueError, TypeError):
-            pass
+        except (ValueError, TypeError) as e:
+            logger.debug(f"Failed to cast config value for {key} to float: {e}")
     return default_val
 
 

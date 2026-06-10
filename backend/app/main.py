@@ -61,8 +61,10 @@ app = FastAPI(
 )
 
 # ── Rate Limiting ─────────────────────────────────────────────
+from slowapi.middleware import SlowAPIMiddleware
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # ── CORS (allow Flutter app from any origin during dev) ───────
 app.add_middleware(

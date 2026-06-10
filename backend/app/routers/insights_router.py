@@ -48,5 +48,5 @@ async def websocket_insights(websocket: WebSocket, token: str = Query(...)):
         # Unexpected error
         try:
             await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Handled error: {e}")

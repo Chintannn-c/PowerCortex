@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -55,7 +56,7 @@ class InsightsController extends GetxController {
               aggregatedInsights.value = parsed;
             }
           } catch (e) {
-            print("Error parsing websocket message: $e");
+            debugPrint("Error parsing websocket message: $e");
           }
         },
         onError: (error) {
@@ -64,7 +65,7 @@ class InsightsController extends GetxController {
         },
         onDone: () {
           // Reconnect logic could be added here if needed
-          print("WebSocket disconnected.");
+          debugPrint("WebSocket disconnected.");
         },
       );
     } catch (e) {
