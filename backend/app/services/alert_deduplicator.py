@@ -89,13 +89,17 @@ class AlertDeduplicator:
             "You are a critical grid operations AI router. Analyse if the new alert is a secondary cascading consequence of the recent alerts (e.g. substation trip causing secondary sags/voltage alerts).\n\n"
             "Recent Active Alerts:\n"
         )
+        from ..utils.security_utils import mask_sensitive_data
+        
         for alert in recent_alerts:
             # Clean titles before feeding to LLM to avoid confusing it with existing nested prefixes
             clean_title = cls.clean_title(alert['title'])
-            prompt += f"- ID: {alert['id']}, Title: {clean_title}, Message: {alert['message']}\n"
+            masked_msg = mask_sensitive_data(alert['message'])
+            prompt += f"- ID: {alert['id']}, Title: {clean_title}, Message: {masked_msg}\n"
         
+        masked_new_msg = mask_sensitive_data(new_notif.message)
         prompt += (
-            f"\nNew Alert:\n- Title: {cls.clean_title(new_notif.title)}, Message: {new_notif.message}\n\n"
+            f"\nNew Alert:\n- Title: {cls.clean_title(new_notif.title)}, Message: {masked_new_msg}\n\n"
             "If they are part of a single cascading incident, group them and generate a single unified Title and Summary Message explaining the cascade.\n"
             "If they are not related or do not cascade, set cascade to false.\n\n"
             "Your output must be a strict JSON object with EXACTLY this structure:\n"
@@ -108,7 +112,35 @@ class AlertDeduplicator:
             "Respond with ONLY the raw JSON object. Do not include any markdown format (like ```json), commentary, or extra characters."
         )
 
-        # 1. Try Groq (using API Key)
+        # 1. Try Mistral (using API Key)
+        mistral_key = getattr(settings, "MISTRAL_API_KEY", None)
+        if mistral_key:
+            try:
+                headers = {
+                    "Authorization": f"Bearer {mistral_key}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": "open-mistral-7b",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.1,
+                    "max_tokens": 512,
+                    "response_format": {"type": "json_object"}
+                }
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    res = await client.post("https://api.mistral.ai/v1/chat/completions", json=payload, headers=headers)
+                    if res.status_code == 200:
+                        content = res.json()["choices"][0]["message"]["content"].strip()
+                        if content.startswith("```"):
+                            content = content.split("```")[1]
+                            if content.startswith("json"):
+                                content = content[4:]
+                        data = json.loads(content.strip())
+                        return data
+            except Exception as e:
+                logger.error(f"Mistral clustering failed: {e}")
+
+        # 2. Try Groq (using API Key)
         if settings.GROQ_API_KEY:
             try:
                 headers = {

@@ -22,6 +22,8 @@ import '../system_health/system_health_screen.dart';
 import '../system_health/system_health_skeleton.dart';
 import '../settings/settings_screen.dart';
 import '../settings/settings_skeleton.dart';
+import '../insights/insights_screen.dart';
+import '../insights/insights_skeleton.dart';
 import 'dart:ui' as ui;
 import '../notifications/notifications_screen.dart';
 import '../../core/services/notification_service.dart';
@@ -591,6 +593,7 @@ class HomeShellState extends State<HomeShell> {
       child: SystemHealthScreen(),
     ),
     const _SkeletonPage(skeleton: SettingsSkeleton(), child: SettingsScreen()),
+    const _SkeletonPage(skeleton: InsightsSkeleton(), child: InsightsScreen()),
   ];
 
   final _titles = [
@@ -602,6 +605,7 @@ class HomeShellState extends State<HomeShell> {
     'Reports & Analytics',
     'System Health',
     'Settings',
+    'AI Insights',
   ];
 
   final _navItems = const [
@@ -737,6 +741,16 @@ class HomeShellState extends State<HomeShell> {
                                 : null,
                           ),
                           tooltip: 'AI Assistant',
+                        ),
+                        IconButton(
+                          onPressed: () => _navigateTo(8),
+                          icon: Icon(
+                            Icons.lightbulb_outline,
+                            color: _currentIndex == 8
+                                ? AppColors.primaryBlue
+                                : null,
+                          ),
+                          tooltip: 'AI Insights',
                         ),
                         IconButton(
                           onPressed: () => _navigateTo(7),
@@ -1028,6 +1042,7 @@ class HomeShellState extends State<HomeShell> {
                   ),
                 ),
                 _sidebarItem(4, Icons.smart_toy, 'AI Assistant'),
+                _sidebarItem(8, Icons.lightbulb_outline, 'AI Insights'),
                 _sidebarItem(7, Icons.settings, 'Settings'),
               ],
             ),
@@ -1311,6 +1326,7 @@ class HomeShellState extends State<HomeShell> {
           _drawerItem(5, Icons.assessment, 'Reports & Analytics'),
           _drawerItem(6, Icons.monitor_heart, 'System Health'),
           _drawerItem(4, Icons.smart_toy, 'AI Assistant'),
+          _drawerItem(8, Icons.lightbulb_outline, 'AI Insights'),
           _drawerItem(7, Icons.settings, 'Settings'),
           const Divider(),
           ListTile(

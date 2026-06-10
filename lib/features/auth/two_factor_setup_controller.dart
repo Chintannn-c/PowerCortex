@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
+import 'package:guvnl_project/core/services/notification_service.dart';
 import 'auth_controller.dart';
 
 class TwoFactorSetupController extends GetxController {
@@ -74,44 +75,29 @@ class TwoFactorSetupController extends GetxController {
   }
 
   void _showNotificationToast(String code) {
-    Get.snackbar(
-      '🔔 Security Alert',
-      'Your verification code is: $code',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.primaryBlue.withOpacity(0.95),
-      colorText: Colors.white,
-      duration: const Duration(seconds: 12),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-      boxShadows: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.25),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        )
-      ],
-      icon: const Icon(Icons.security_rounded, color: Colors.white),
-      mainButton: TextButton(
-        onPressed: () {
-          codeController.text = code;
-          codeLength.value = code.length;
-          if (Get.isSnackbarOpen) {
-            Get.back();
-          }
-          verifyAndEnable();
-        },
-        style: TextButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: Colors.white24,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        ),
-        child: const Text(
-          'Autofill',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
+    try {
+      // Push code via real OS notification
+      final notifService = Get.isRegistered<NotificationService>() 
+          ? Get.find<NotificationService>() 
+          : Get.put(NotificationService());
+          
+      notifService.showLocalNotification(
+        id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+        title: 'PowerCortex Security',
+        body: 'Your verification code is: $code',
+        payload: '{"type":"2fa_code"}',
+      );
+    } catch (e) {
+      debugPrint("Error pushing local notification: $e");
+      // Fallback to snackbar if notification service fails
+      Get.snackbar(
+        'Security Alert',
+        'Your verification code is: $code',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.primaryBlue.withOpacity(0.95),
+        colorText: Colors.white,
+      );
+    }
   }
 
   void startTimer() {

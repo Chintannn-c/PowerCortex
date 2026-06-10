@@ -19,7 +19,7 @@ from .core.config import settings
 from .core.database import close_mongo_connection, connect_to_mongo
 from .core.rate_limiter import limiter, _rate_limit_exceeded_handler, RateLimitExceeded
 from .middleware.logging_middleware import LoggingMiddleware
-from .routers import auth_router, user_router, notification_router, forecast_router, transformer_router, fault_router, theft_router, assistant_router, system_health_router, renewable_router, weather_router, report_router, validation_router
+from .routers import auth_router, user_router, notification_router, forecast_router, transformer_router, fault_router, theft_router, assistant_router, system_health_router, renewable_router, weather_router, report_router, validation_router, insights_router
 
 # ── Logging ───────────────────────────────────────────────────
 logging.basicConfig(
@@ -38,15 +38,8 @@ async def lifespan(app: FastAPI):
     await connect_to_mongo()
     logger.info("MongoDB connected – database: %s", settings.DATABASE_NAME)
     
-    # Load ML forecasting model on startup
-    from .utils.model_loader import ModelLoader
-    ModelLoader.load_model()
-    ModelLoader.load_transformer_model()
-    ModelLoader.load_fault_model()
-    ModelLoader.load_theft_model()
-    ModelLoader.load_system_health_model()
-    from .ml.renewable_predictor import RenewablePredictor
-    RenewablePredictor.load_models()
+    # Models will be lazy-loaded on first inference request to prevent blocking
+    # the async event loop during startup.
     
     yield
     logger.info("Shutting down MongoDB connection …")
@@ -101,6 +94,7 @@ app.include_router(renewable_router.router)
 app.include_router(weather_router.router)
 app.include_router(report_router.router)
 app.include_router(validation_router.router)
+app.include_router(insights_router.router)
 
 
 

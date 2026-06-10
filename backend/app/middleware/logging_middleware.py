@@ -50,4 +50,29 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             elapsed_ms,
             client_ip,
         )
+
+        # ── Audit Logging ─────────────────────────────────────────────
+        try:
+            import asyncio
+            from ..core.database import get_database
+            from ..utils.helpers import utcnow
+            db = get_database()
+            
+            user_id = "anonymous"
+            if hasattr(request, "state") and hasattr(request.state, "user"):
+                user_id = getattr(request.state.user, "email", "anonymous")
+            
+            audit_record = {
+                "method": method,
+                "path": path,
+                "status_code": response.status_code,
+                "ip_address": client_ip,
+                "user_id": user_id,
+                "timestamp": utcnow(),
+                "elapsed_ms": elapsed_ms
+            }
+            asyncio.create_task(db.audit_logs.insert_one(audit_record))
+        except Exception as e:
+            logger.debug(f"Failed to record audit log: {e}")
+
         return response

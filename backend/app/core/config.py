@@ -6,6 +6,8 @@ a singleton ``Settings`` instance consumed throughout the app.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import model_validator
+from typing import List
 
 
 class Settings(BaseSettings):
@@ -49,7 +51,7 @@ class Settings(BaseSettings):
 
     # ── API / Deployment ──────────────────────────────────────
     API_BASE_URL: str = ""
-    CORS_ORIGINS: list[str] = []
+    CORS_ORIGINS: List[str] = []
     RATE_LIMIT_PER_MINUTE: int = 60
     ALLOW_DEMO_DATA: bool = False
     ALLOW_MODEL_FALLBACKS: bool = False
@@ -59,6 +61,15 @@ class Settings(BaseSettings):
     DEFAULT_CITY: str = "Ahmedabad"
     DEFAULT_LATITUDE: float = 23.0225
     DEFAULT_LONGITUDE: float = 72.5714
+
+    @model_validator(mode='after')
+    def validate_security(self) -> 'Settings':
+        if not self.DEBUG:
+            if len(self.JWT_SECRET_KEY) < 32:
+                raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production.")
+            if "*" in self.CORS_ORIGINS:
+                raise ValueError("Wildcard CORS_ORIGINS are forbidden in production.")
+        return self
 
 
 # Global singleton – import this wherever settings are needed.

@@ -130,7 +130,9 @@ class AssistantService:
             f"Power Theft Analytics Summary:\n{theft_summary}\n"
             "-------------------------------------\n"
         )
-        return context
+        
+        from ..utils.security_utils import mask_sensitive_data
+        return mask_sensitive_data(context)
 
     async def generate_response(self, message: str, history: Optional[List[Dict]] = None, user: Optional[Dict] = None) -> Dict[str, any]:
         """Send prompt to Groq Cloud endpoint with live context injection."""
@@ -207,19 +209,39 @@ class AssistantService:
                         "confidence": 95.0
                     }
                 else:
-                    logger.error(f"Groq API returned status code {response.status_code}: {response.text}")
-                    res = {
-                        "success": True,
-                        "reply": f"The AI Assistant experienced a temporary communication error with the LLM servers (status {response.status_code}). However, here is the live status: Grid Demand is 41,134 MW, Peak Predicted is 42,116 MW, and there are active warnings requiring operational attention.",
-                        "confidence": 75.0
-                    }
+                    raise Exception(f"Groq error {response.status_code}: {response.text}")
         except Exception as e:
-            logger.error(f"Exception during AI response generation: {e}")
-            res = {
-                "success": True,
-                "reply": "An error occurred while communicating with the AI model. Please check the network connectivity of the PowerCortex server.",
-                "confidence": 50.0
-            }
+            logger.error(f"Groq failed during AI response generation: {e}. Attempting OpenRouter fallback.")
+            openrouter_key = settings.OPENROUTER_API_KEY
+            if openrouter_key:
+                try:
+                    or_headers = {
+                        "Authorization": f"Bearer {openrouter_key}",
+                        "Content-Type": "application/json"
+                    }
+                    or_payload = payload.copy()
+                    or_payload["model"] = "meta-llama/llama-3-8b-instruct:free"
+                    async with httpx.AsyncClient(timeout=15.0) as client:
+                        response = await client.post("https://openrouter.ai/api/v1/chat/completions", json=or_payload, headers=or_headers)
+                        if response.status_code == 200:
+                            data = response.json()
+                            reply = data["choices"][0]["message"]["content"]
+                            res = {
+                                "success": True,
+                                "reply": reply,
+                                "confidence": 95.0
+                            }
+                        else:
+                            raise Exception(f"OpenRouter error {response.status_code}: {response.text}")
+                except Exception as or_e:
+                    logger.error(f"OpenRouter fallback failed: {or_e}")
+                    
+            if not res:
+                res = {
+                    "success": True,
+                    "reply": "An error occurred while communicating with both primary and fallback AI models. Please check network connectivity.",
+                    "confidence": 50.0
+                }
 
         await self._save_to_db(message, res, user)
         return res
@@ -315,10 +337,37 @@ class AssistantService:
                         "text": parsed.get("text")
                     }
                 else:
-                    logger.error(f"Groq Search Parser returned status code {response.status_code}: {response.text}")
-                    return self._heuristic_search_parse(query)
+                    raise Exception(f"Groq error {response.status_code}: {response.text}")
         except Exception as e:
-            logger.error(f"Exception during smart search parsing: {e}")
+            logger.error(f"Groq Search Parser failed: {e}. Attempting OpenRouter fallback.")
+            openrouter_key = settings.OPENROUTER_API_KEY
+            if openrouter_key:
+                try:
+                    import json
+                    or_headers = {
+                        "Authorization": f"Bearer {openrouter_key}",
+                        "Content-Type": "application/json"
+                    }
+                    or_payload = payload.copy()
+                    or_payload["model"] = "meta-llama/llama-3-8b-instruct:free"
+                    async with httpx.AsyncClient(timeout=10.0) as client:
+                        response = await client.post("https://openrouter.ai/api/v1/chat/completions", json=or_payload, headers=or_headers)
+                        if response.status_code == 200:
+                            data = response.json()
+                            content_str = data["choices"][0]["message"]["content"]
+                            parsed = json.loads(content_str)
+                            return {
+                                "success": True,
+                                "intent": parsed.get("intent", "answer"),
+                                "tab": parsed.get("tab"),
+                                "query": parsed.get("query"),
+                                "text": parsed.get("text")
+                            }
+                        else:
+                            raise Exception(f"OpenRouter error {response.status_code}: {response.text}")
+                except Exception as or_e:
+                    logger.error(f"OpenRouter Search Parser fallback failed: {or_e}")
+                    
             return self._heuristic_search_parse(query)
 
     def _heuristic_search_parse(self, query: str) -> Dict[str, any]:

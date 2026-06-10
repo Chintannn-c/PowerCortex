@@ -229,11 +229,6 @@ async def get_ai_report_summary(db) -> Dict[str, Any]:
         assistant_service = AssistantService(db)
         grid_context = await assistant_service.get_live_grid_context()
         
-        api_key = getattr(settings, "GROQ_API_KEY", None)
-        if not api_key:
-            logger.warning("GROQ_API_KEY missing. Using heuristic report fallback.")
-            return fallback_res
-
         system_content = (
             "You are PowerCortex AI Report Generator, a utility grid analytics expert built for GUVNL.\n"
             "Your task is to write a professional, highly executive summary paragraph (strictly under 100 words) "
@@ -250,6 +245,48 @@ async def get_ai_report_summary(db) -> Dict[str, Any]:
             "Ensure you return valid JSON only. Do not wrap it in markdown backticks or include any other text."
         )
         user_content = f"Here is the live grid telemetry context:\n\n{grid_context}\n\nGenerate the report JSON."
+
+        # 1. Try Mistral
+        mistral_key = getattr(settings, "MISTRAL_API_KEY", None)
+        if mistral_key:
+            try:
+                headers = {
+                    "Authorization": f"Bearer {mistral_key}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": "open-mistral-7b",
+                    "messages": [
+                        {"role": "system", "content": system_content},
+                        {"role": "user", "content": user_content}
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 1024,
+                    "response_format": {"type": "json_object"}
+                }
+                async with httpx.AsyncClient(timeout=15.0) as client:
+                    response = await client.post("https://api.mistral.ai/v1/chat/completions", json=payload, headers=headers)
+                    if response.status_code == 200:
+                        data = response.json()
+                        content = data["choices"][0]["message"]["content"].strip()
+                        if content.startswith("```"):
+                            lines = content.split("\n")
+                            if lines[0].startswith("```"):
+                                lines = lines[1:]
+                            if lines[-1].startswith("```"):
+                                lines = lines[:-1]
+                            content = "\n".join(lines).strip()
+                        parsed = json.loads(content)
+                        if "summary" in parsed and "recommendations" in parsed:
+                            return parsed
+            except Exception as e:
+                logger.error(f"Mistral AI report generation failed: {e}")
+
+        # 2. Try Groq
+        api_key = getattr(settings, "GROQ_API_KEY", None)
+        if not api_key:
+            logger.warning("GROQ_API_KEY missing. Using heuristic report fallback.")
+            return fallback_res
 
         headers = {
             "Authorization": f"Bearer {api_key}",

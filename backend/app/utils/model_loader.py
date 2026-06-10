@@ -258,6 +258,9 @@ class ModelLoader:
         Core interface to generate a prediction using either 
         the active deep learning model or the heuristic fallback.
         """
+        if cls._model is None:
+            cls.load_model()
+            
         hist = features.get("historical_demand", [])
         if len(hist) < 24:
             if not settings.ALLOW_MODEL_FALLBACKS:
@@ -308,6 +311,10 @@ class ModelLoader:
             cls.initialize_data()
         if cls._df is None:
             return []
+            
+        if cls._model is None:
+            cls.load_model()
+            
         if cls._model is None and not settings.ALLOW_MODEL_FALLBACKS:
             logger.error("Demand timeline prediction unavailable: LSTM model is not loaded.")
             return []
@@ -379,6 +386,10 @@ class ModelLoader:
             cls.initialize_data()
         if cls._df is None:
             return []
+            
+        if cls._model is None:
+            cls.load_model()
+            
         if cls._model is None and not settings.ALLOW_MODEL_FALLBACKS:
             logger.error("Future demand forecast unavailable: LSTM model is not loaded.")
             return []
@@ -467,6 +478,9 @@ class ModelLoader:
     @classmethod
     def predict_transformer(cls, temperature: float, voltage: float, current: float, oil_level: float, load_percentage: float) -> tuple[float, float, str]:
         """Runs inference using Keras MLP model or fallback heuristics."""
+        if cls._transformer_model is None:
+            cls.load_transformer_model()
+            
         if cls._transformer_model is not None and cls._transformer_scaler is not None:
             try:
                 import tensorflow as tf
@@ -536,6 +550,9 @@ class ModelLoader:
     @classmethod
     def predict_fault(cls, voltage: float, current: float, frequency: float) -> tuple[int, float, str]:
         """Runs inference using Keras MLP model to predict fault type label and confidence probability."""
+        if cls._fault_model is None:
+            cls.load_fault_model()
+            
         if cls._fault_model is not None and cls._fault_scaler is not None:
             try:
                 import tensorflow as tf
@@ -618,6 +635,9 @@ class ModelLoader:
         is_suspicious = False
         probability = 15.0  # Normal base probability
         
+        if cls._theft_model is None:
+            cls.load_theft_model()
+            
         if cls._theft_model is not None and cls._theft_scaler is not None:
             try:
                 features = np.array([[current_consumption, avg_consumption, power_factor, deviation]])
@@ -693,6 +713,9 @@ class ModelLoader:
     @classmethod
     def predict_system_health(cls, cpu_usage: float, memory_usage: float, network_latency: float, db_connected: float, api_latency: float) -> tuple[float, float]:
         """Runs inference using Keras MLP model to predict system health score and failure probability."""
+        if cls._system_health_model is None:
+            cls.load_system_health_model()
+            
         if cls._system_health_model is not None and cls._system_health_scaler is not None:
             try:
                 import tensorflow as tf
