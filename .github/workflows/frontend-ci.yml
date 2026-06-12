@@ -24,5 +24,9 @@ jobs:
     - name: Analyze project source
       run: flutter analyze --no-fatal-infos
 
+    - name: Run tests
+      run: flutter test
+
     - name: Build Web app
       run: flutter build web --release --dart-define=API_BASE_URL=https://api.powercortex.com
+

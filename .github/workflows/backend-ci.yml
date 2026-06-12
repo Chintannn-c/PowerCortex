@@ -40,7 +40,7 @@ jobs:
         
     - name: Test ML Signature Generator
       run: |
-        python ../generate_model_hashes.py
+        python generate_model_hashes.py
 
     - name: Run Pytest Suite
       env:
@@ -51,4 +51,5 @@ jobs:
         ALGORITHM: HS256
         ACCESS_TOKEN_EXPIRE_MINUTES: 30
       run: |
-        pytest tests/
+        python -m pytest .
+
