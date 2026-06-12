@@ -3,10 +3,10 @@ from typing import List, Optional
 from datetime import datetime
 
 class TheftPredictRequest(BaseModel):
-    consumer_id: str = Field(..., example="CN-88029")
-    current_consumption: float = Field(..., example=420.0)
-    avg_consumption: float = Field(..., example=1180.0)
-    power_factor: float = Field(..., example=0.72)
+    consumer_id: str = Field(..., json_schema_extra={"example": "CN-88029"})
+    current_consumption: float = Field(..., json_schema_extra={"example": 420.0})
+    avg_consumption: float = Field(..., json_schema_extra={"example": 1180.0})
+    power_factor: float = Field(..., json_schema_extra={"example": 0.72})
 
 class TheftPredictData(BaseModel):
     consumer_id: str

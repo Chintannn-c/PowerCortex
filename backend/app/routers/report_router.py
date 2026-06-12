@@ -1,7 +1,7 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
-from typing import List, Dict, Optional, Any
+from typing import Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.responses import StreamingResponse
 import asyncio
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/reports", tags=["Reports"])
 
 @router.get("", summary="Get all available reports metadata")
 async def get_reports(current_user: dict = Depends(get_current_user)):
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     month_year = now.strftime("%B %Y")
     week_str = f"Week {now.isocalendar()[1]}, {now.year}"
     date_str = now.strftime("%B %d, %Y")

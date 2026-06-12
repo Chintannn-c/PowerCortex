@@ -1,6 +1,6 @@
 import httpx
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from ..core.config import settings
 from ..core.grid_constants import (
@@ -45,7 +45,7 @@ class WeatherService:
         else:
             cache_key = f"{round(latitude, 2)}_{round(longitude, 2)}"
             
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         # Check cache
         if cache_key in cls._cache:

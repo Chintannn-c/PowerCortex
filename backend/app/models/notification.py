@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from ..utils.helpers import utcnow
 
@@ -20,6 +20,4 @@ class NotificationResponse(NotificationCreate):
     is_read: bool = Field(default=False)
     created_at: datetime
 
-    class Config:
-        populate_by_name = True
-        json_encoders = {datetime: lambda v: v.isoformat()}
+    model_config = ConfigDict(populate_by_name=True)

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from ..core.database import get_database
 from ..core.config import settings
@@ -58,7 +58,7 @@ async def get_validation_dashboard(
             avg_confidence = 94.2
             data_quality = 98.5
             avg_agreement = 95.0
-            last_time = datetime.utcnow().isoformat()
+            last_time = datetime.now(timezone.utc).isoformat()
 
         # 3. Check APIs
         ai_status = "Online" if settings.GROQ_API_KEY else "Offline"

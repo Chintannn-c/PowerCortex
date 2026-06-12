@@ -74,6 +74,9 @@ class RenewablePredictor:
         try:
             # Scale features
             features = np.array([[temp, humidity, wind_speed, cloud_cover]], dtype=np.float32)
+            if hasattr(cls._scaler, "feature_names_in_"):
+                import pandas as pd
+                features = pd.DataFrame(features, columns=cls._scaler.feature_names_in_)
             scaled_features = cls._scaler.transform(features)
             
             # Keras inference

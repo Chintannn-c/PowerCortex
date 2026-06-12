@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import Optional, List
 
@@ -23,8 +23,7 @@ class ForecastDocumentResponse(BaseModel):
     insights: list[str]
     created_at: datetime
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 class ForecastListResponse(BaseModel):
     success: bool = True

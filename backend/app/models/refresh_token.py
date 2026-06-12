@@ -7,7 +7,7 @@ Pydantic v2 model for the ``refresh_tokens`` MongoDB collection.
 from typing import Optional
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from ..utils.helpers import utcnow
 
@@ -22,6 +22,4 @@ class RefreshTokenDocument(BaseModel):
     ip_address: Optional[str] = Field(default="0.0.0.0")
     created_at: datetime = Field(default_factory=utcnow)
 
-    class Config:
-        populate_by_name = True
-        json_encoders = {datetime: lambda v: v.isoformat()}
+    model_config = ConfigDict(populate_by_name=True)

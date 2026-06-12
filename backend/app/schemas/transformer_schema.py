@@ -1,19 +1,19 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import List
 
 class TransformerPredictRequest(BaseModel):
-    temperature: float = Field(..., example=67.0)
-    voltage: float = Field(..., example=11.2)
-    current: float = Field(..., example=320.0)
-    oil_level: float = Field(..., example=84.0)
-    load_percentage: float = Field(..., example=72.0)
+    temperature: float = Field(..., json_schema_extra={"example": 67.0})
+    voltage: float = Field(..., json_schema_extra={"example": 11.2})
+    current: float = Field(..., json_schema_extra={"example": 320.0})
+    oil_level: float = Field(..., json_schema_extra={"example": 84.0})
+    load_percentage: float = Field(..., json_schema_extra={"example": 72.0})
 
 class TransformerPredictResponse(BaseModel):
-    health_score: float = Field(..., example=92.0)
-    risk_score: float = Field(..., example=8.0)
-    failure_probability: float = Field(..., example=3.0)
-    status: str = Field(..., example="Healthy")
+    health_score: float = Field(..., json_schema_extra={"example": 92.0})
+    risk_score: float = Field(..., json_schema_extra={"example": 8.0})
+    failure_probability: float = Field(..., json_schema_extra={"example": 3.0})
+    status: str = Field(..., json_schema_extra={"example": "Healthy"})
 
 class TransformerResponse(BaseModel):
     id: str = Field(..., alias="_id")
@@ -31,11 +31,7 @@ class TransformerResponse(BaseModel):
     status: str
     last_updated: datetime
 
-    class Config:
-        populate_by_name = True
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat()
-        }
+    model_config = ConfigDict(populate_by_name=True)
 
 class TransformerDashboardResponse(BaseModel):
     total: int

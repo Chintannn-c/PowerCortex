@@ -448,6 +448,8 @@ class ModelLoader:
             try:
                 import tensorflow as tf
                 features = np.array([[temperature, voltage, current, oil_level, load_percentage]])
+                if hasattr(cls._transformer_scaler, "feature_names_in_"):
+                    features = pd.DataFrame(features, columns=cls._transformer_scaler.feature_names_in_)
                 scaled_features = cls._transformer_scaler.transform(features)
                 preds = cls._transformer_model(tf.convert_to_tensor(scaled_features, dtype=tf.float32), training=False).numpy()
                 health_score = float(preds[0][0])
@@ -510,6 +512,8 @@ class ModelLoader:
                     current = current / 10.0
                     
                 features = np.array([[voltage, current, frequency]])
+                if hasattr(cls._fault_scaler, "feature_names_in_"):
+                    features = pd.DataFrame(features, columns=cls._fault_scaler.feature_names_in_)
                 scaled_features = cls._fault_scaler.transform(features)
                 
                 # Inference using Keras model
@@ -599,6 +603,8 @@ class ModelLoader:
             try:
                 import tensorflow as tf
                 features = np.array([[current_consumption, avg_consumption, power_factor, deviation]])
+                if hasattr(cls._theft_scaler, "feature_names_in_"):
+                    features = pd.DataFrame(features, columns=cls._theft_scaler.feature_names_in_)
                 scaled_features = cls._theft_scaler.transform(features)
                 
                 # Autoencoder reconstructs the input
@@ -675,6 +681,8 @@ class ModelLoader:
             try:
                 import tensorflow as tf
                 features = np.array([[cpu_usage, memory_usage, network_latency, db_connected, api_latency]])
+                if hasattr(cls._system_health_scaler, "feature_names_in_"):
+                    features = pd.DataFrame(features, columns=cls._system_health_scaler.feature_names_in_)
                 scaled_features = cls._system_health_scaler.transform(features)
                 preds = cls._system_health_model(tf.convert_to_tensor(scaled_features, dtype=tf.float32), training=False).numpy()
                 health_score = float(preds[0][0])
