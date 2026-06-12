@@ -13,7 +13,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
+from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Input
 from tensorflow.keras.callbacks import EarlyStopping
 
 # Output directory
@@ -138,7 +138,8 @@ X_features_scaled = scaler.transform(X_features)
 # ==============================================================================
 print("\nStep 4: Training high-capacity Deep Learning MLP Classifier...")
 model = Sequential([
-    Dense(256, activation='relu', input_shape=(X_features.shape[1],)),
+    Input(shape=(X_features.shape[1],)),
+    Dense(256, activation='relu'),
     Dense(128, activation='relu'),
     Dense(64, activation='relu'),
     Dense(32, activation='relu'),
