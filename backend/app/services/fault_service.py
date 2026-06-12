@@ -104,7 +104,7 @@ class FaultDetectionService:
                     voltage=voltage,
                     current=current,
                     frequency=frequency,
-                    predicted_fault=pred_label,
+                    predicted_fault=fault_type,
                     dl_prob=probability
                 )
                 agreement_score = val_res.get("agreement_score", 100.0)
@@ -115,9 +115,10 @@ class FaultDetectionService:
                 logger.error(f"Error executing fault validation consensus: {val_err}")
 
 
-        # Generate unique human ID
-        count = await self.repository._collection.count_documents({})
-        fault_id = f"FLT-{count + 1:03d}"
+        # Generate unique human ID using timestamp + random suffix to avoid race conditions
+        import uuid
+        short_uid = uuid.uuid4().hex[:6].upper()
+        fault_id = f"FLT-{short_uid}"
 
         # 4. Construct fault document
         fault_doc = {

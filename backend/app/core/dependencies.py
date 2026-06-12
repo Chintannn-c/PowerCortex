@@ -4,7 +4,7 @@ PowerCortex – FastAPI Dependencies
 Provides ``get_current_user`` for protecting routes via JWT bearer tokens.
 """
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .database import get_database
@@ -15,6 +15,7 @@ _bearer_scheme = HTTPBearer()
 
 
 async def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
 ) -> dict:
     """Extract and validate the JWT from the Authorization header.
@@ -59,4 +60,5 @@ async def get_current_user(
             detail={"success": False, "message": "Account is deactivated"},
         )
 
+    request.state.user = user
     return user

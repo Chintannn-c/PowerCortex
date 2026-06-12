@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from typing import List, Dict
 from datetime import datetime
 
@@ -23,7 +24,7 @@ class InsightsService:
         "data": [],
         "timestamp": 0
     }
-    CACHE_TTL_SECONDS = 15
+    CACHE_TTL_SECONDS = 60
 
     @classmethod
     async def get_aggregated_insights(cls) -> List[Dict]:
@@ -39,11 +40,33 @@ class InsightsService:
         transformer_service = TransformerService(TransformerRepository(db))
         forecast_service = ForecastingService(ForecastRepository(db))
         
+        # Run tasks concurrently to avoid sequential latency accumulation
+        try:
+            results = await asyncio.gather(
+                fault_service.get_active_faults(limit=5),
+                transformer_service.get_critical_assets(),
+                theft_service.get_all_suspicious(limit=5),
+                forecast_service.get_dashboard_summary(),
+                return_exceptions=True
+            )
+        except Exception as gather_err:
+            logger.error(f"Error in asyncio.gather for insights: {gather_err}")
+            results = [[], [], [], {}]
+
+        active_faults = results[0] if len(results) > 0 and not isinstance(results[0], Exception) else []
+        critical_assets = results[1] if len(results) > 1 and not isinstance(results[1], Exception) else []
+        suspicious_consumers = results[2] if len(results) > 2 and not isinstance(results[2], Exception) else []
+        dashboard_summary = results[3] if len(results) > 3 and not isinstance(results[3], Exception) else {}
+
+        # Log exceptions if any occurred in the gather list
+        for idx, res in enumerate(results):
+            if isinstance(res, Exception):
+                logger.error(f"Insight component task {idx} failed with: {res}")
+        
         raw_insights = []
 
         # 1. Fault Detection Insights (Anomalies)
         try:
-            active_faults = await fault_service.get_active_faults(limit=5)
             for fault in active_faults:
                 severity = fault.get('severity', 'High')
                 fault_type = fault.get('fault_type', 'Unknown Fault')
@@ -65,7 +88,6 @@ class InsightsService:
 
         # 2. Transformer Diagnostics Insights (Equipment)
         try:
-            critical_assets = await transformer_service.get_critical_assets()
             for asset in critical_assets[:5]:  # limit to 5
                 asset_id = asset.get('asset_id', '')
                 failure_prob = asset.get('failure_probability', 0.0)
@@ -84,7 +106,6 @@ class InsightsService:
 
         # 3. Theft Detection Insights (Revenue Risk)
         try:
-            suspicious_consumers = await theft_service.get_all_suspicious(limit=5)
             for consumer in suspicious_consumers:
                 consumer_id = consumer.get('consumer_id', '')
                 prob = consumer.get('theft_probability', 0.0)
@@ -103,7 +124,6 @@ class InsightsService:
 
         # 4. General Forecasting / Weather Insights
         try:
-            dashboard_summary = await forecast_service.get_dashboard_summary()
             general_insights = dashboard_summary.get('insights', [])
             
             for index, gi_text in enumerate(general_insights):

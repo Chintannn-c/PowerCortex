@@ -16,10 +16,9 @@ logger = logging.getLogger("powercortex.services.notifications")
 
 # Initialize Firebase Admin inside try/except block to be fully crash-safe
 try:
-    # Use google-services.json if it's actually a service account file, 
-    # or fallback to environment path, or initialize without credentials (ADC)
-    cred_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON", "android/app/google-services.json")
-    if os.path.exists(cred_path):
+    # Only use an explicit service account JSON if provided via environment variable
+    cred_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON", "")
+    if cred_path and os.path.exists(cred_path):
         try:
             cred = credentials.Certificate(cred_path)
             firebase_admin.initialize_app(cred)
@@ -29,7 +28,7 @@ try:
             firebase_admin.initialize_app()
     else:
         firebase_admin.initialize_app()
-        logger.info("Firebase Admin initialized using default credentials.")
+        logger.info("Firebase Admin initialized using default credentials (ADC).")
 except Exception as e:
     logger.warning(f"Firebase Admin SDK initialization skipped or failed: {e}. Simulated push alerts will be used.")
 

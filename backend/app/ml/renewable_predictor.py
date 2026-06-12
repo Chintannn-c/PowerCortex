@@ -9,6 +9,8 @@ from ..core.grid_constants import (
     SOURCE_KERAS_DL_MODEL,
 )
 
+from ..utils.model_security import verify_file_hash, load_model_hashes, SecurityError
+
 logger = logging.getLogger("powercortex.ml.renewable_predictor")
 
 class RenewablePredictor:
@@ -16,6 +18,7 @@ class RenewablePredictor:
     _wind_model = None
     _scaler = None
     _models_loaded = False
+    _model_hashes = None
 
     @classmethod
     def load_models(cls):
@@ -26,8 +29,16 @@ class RenewablePredictor:
             solar_path = os.path.join(base_dir, "models", "solar_forecast_model.keras")
             wind_path = os.path.join(base_dir, "models", "wind_forecast_model.keras")
             scaler_path = os.path.join(base_dir, "models", "renewable_scaler.pkl")
+            hashes_path = os.path.join(os.path.dirname(base_dir), "models", "model_hashes.json")
 
             if os.path.exists(solar_path) and os.path.exists(wind_path) and os.path.exists(scaler_path):
+                if cls._model_hashes is None:
+                    cls._model_hashes = load_model_hashes(hashes_path)
+                
+                verify_file_hash(solar_path, cls._model_hashes)
+                verify_file_hash(wind_path, cls._model_hashes)
+                verify_file_hash(scaler_path, cls._model_hashes)
+
                 import tensorflow as tf
                 # Disable TF warnings
                 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -36,11 +47,14 @@ class RenewablePredictor:
                 cls._wind_model = tf.keras.models.load_model(wind_path)
                 cls._scaler = joblib.load(scaler_path)
                 cls._models_loaded = True
-                logger.info("Renewable forecasting Keras DL models loaded successfully.")
+                logger.info("Renewable forecasting Keras DL models verified and loaded successfully.")
                 return True
             else:
                 logger.warning("Renewable DL models or scaler not found in %s/models/", base_dir)
                 return False
+        except SecurityError as se:
+            logger.error(f"Security violation during renewable model verification: {se}")
+            raise
         except Exception:
             logger.exception("Error loading renewable forecasting DL models.")
             return False

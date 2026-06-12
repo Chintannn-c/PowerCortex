@@ -202,7 +202,7 @@ async def setup_2fa(current_user: dict = Depends(get_current_user)):
     return result
 
 # ── GET /api/auth/2fa/code ────────────────────────────────────
-@router.get("/2fa/code", summary="Get current 2FA TOTP code")
+@router.get("/2fa/code", summary="Request 2FA TOTP code via email")
 async def get_2fa_code(current_user: dict = Depends(get_current_user)):
     db = get_database()
     service = AuthService(db)
@@ -210,7 +210,8 @@ async def get_2fa_code(current_user: dict = Depends(get_current_user)):
     if result["success"]:
         from ..services.email_service import EmailService
         EmailService.send_2fa_code(current_user["email"], result["code"])
-    return result
+    # SECURITY: Never return the TOTP code in the API response — deliver via email only
+    return {"success": result["success"], "message": "Verification code sent to your registered email."}
 
 # ── POST /api/auth/2fa/verify ─────────────────────────────────
 @router.post(
@@ -287,4 +288,5 @@ async def get_login_2fa_code(body: GetLogin2FACodeRequest, background_tasks: Bac
     from ..services.email_service import EmailService
     background_tasks.add_task(EmailService.send_2fa_code, user["email"], code)
     
-    return {"success": True, "code": code, "email": user["email"]}
+    # SECURITY: Never return the TOTP code in the API response — deliver via email only
+    return {"success": True, "message": "Verification code sent to your registered email."}

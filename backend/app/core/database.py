@@ -4,9 +4,12 @@ PowerCortex – Async MongoDB Connection
 Provides Motor-based async database access and index creation on startup.
 """
 
+import logging
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
 from .config import settings
+
+logger = logging.getLogger("powercortex.core.database")
 
 # ── Module-level client reference ──────────────────────────────
 _client: AsyncIOMotorClient | None = None
@@ -24,9 +27,20 @@ async def connect_to_mongo() -> None:
     await _database.users.create_index("email", unique=True)
     await _database.refresh_tokens.create_index("token", unique=True)
     await _database.refresh_tokens.create_index("user_id")
-    await _database.refresh_tokens.create_index("expires_at")
+    try:
+        await _database.refresh_tokens.create_index("expires_at", expireAfterSeconds=0)  # TTL: auto-delete expired tokens
+    except Exception as e:
+        logger.warning(f"Failed to create TTL index for refresh_tokens: {e}. Dropping and recreating index...")
+        try:
+            await _database.refresh_tokens.drop_index("expires_at_1")
+            await _database.refresh_tokens.create_index("expires_at", expireAfterSeconds=0)
+        except Exception as ex:
+            logger.error(f"Failed to drop and recreate index: {ex}")
     await _database.audit_logs.create_index("user_id")
     await _database.audit_logs.create_index("timestamp")
+    await _database.notifications.create_index("user_id")
+    await _database.notifications.create_index("created_at")
+    await _database.notifications.create_index("is_read")
     await _database.transformers.create_index("asset_id", unique=True)
     await _database.transformers.create_index("status")
     await _database.faults.create_index("fault_id", unique=True)

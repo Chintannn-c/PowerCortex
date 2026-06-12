@@ -7,7 +7,6 @@ from ..utils.model_loader import ModelLoader
 from ..utils.helpers import utcnow
 from ..models.notification import NotificationCreate
 from .notification_service import NotificationService
-from ..core.config import settings
 from ..core.exceptions import IncompleteOperationalDataError
 from ..core.config_loader import config
 from ..core.grid_constants import SOURCE_SEED_DATA

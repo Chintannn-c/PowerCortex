@@ -112,10 +112,27 @@ async def health_check():
 
 @app.get("/health", tags=["Health"])
 async def health():
-    """Detailed health-check."""
-    return {
-        "success": True,
+    """Detailed health-check with MongoDB connectivity verification."""
+    from .core.database import get_database
+    db_healthy = False
+    try:
+        db = get_database()
+        await db.command("ping")
+        db_healthy = True
+    except Exception:
+        pass
+
+    status_str = "healthy" if db_healthy else "unhealthy"
+    response = {
+        "success": db_healthy,
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
-        "status": "healthy",
+        "status": status_str,
+        "checks": {
+            "mongodb": "connected" if db_healthy else "unreachable",
+        }
     }
+    if not db_healthy:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=503, content=response)
+    return response

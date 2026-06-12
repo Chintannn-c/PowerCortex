@@ -1,8 +1,11 @@
+import logging
 from typing import List, Optional
 from datetime import timedelta
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
+
+logger = logging.getLogger("powercortex.routers.notifications")
 
 from ..models.notification import NotificationCreate, NotificationResponse
 from ..services.notification_service import NotificationService
@@ -150,11 +153,12 @@ async def websocket_endpoint(websocket: WebSocket, token: Optional[str] = None):
 @router.delete("/")
 async def delete_all_notifications(current_user: UserDocument = Depends(get_current_user)):
     """
-    Clear all notifications from the database.
+    Clear all notifications for the current user.
     """
     db = get_database()
-    await db.notifications.delete_many({})
-    return {"success": True, "message": "All notifications cleared successfully"}
+    user_id = str(current_user["_id"])
+    await db.notifications.delete_many({"$or": [{"user_id": user_id}, {"user_id": None}]})
+    return {"success": True, "message": "Your notifications cleared successfully"}
 
 @router.delete("/{notification_id}")
 async def delete_notification(notification_id: str, current_user: UserDocument = Depends(get_current_user)):
@@ -173,8 +177,8 @@ async def delete_notification(notification_id: str, current_user: UserDocument =
     return {"success": True, "message": "Notification deleted successfully"}
 
 @router.post("/test", response_model=NotificationResponse)
-async def test_trigger_notification(notif: NotificationCreate):
+async def test_trigger_notification(notif: NotificationCreate, current_user: UserDocument = Depends(get_current_user)):
     """
-    Mock endpoint to simulate ML triggering a notification.
+    Test endpoint to simulate ML triggering a notification. Requires authentication.
     """
     return await NotificationService.create_and_send_notification(notif)

@@ -51,7 +51,7 @@ class Settings(BaseSettings):
 
     # ── API / Deployment ──────────────────────────────────────
     API_BASE_URL: str = ""
-    CORS_ORIGINS: List[str] = []
+    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080", "http://10.0.2.2:8000", "http://127.0.0.1:8000"]
     RATE_LIMIT_PER_MINUTE: int = 60
     ALLOW_DEMO_DATA: bool = False
     ALLOW_MODEL_FALLBACKS: bool = False

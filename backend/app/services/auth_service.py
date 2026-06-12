@@ -338,8 +338,7 @@ class AuthService:
 
         return {
             "success": True,
-            "message": "If the email exists, a reset token has been generated",
-            "data": {"reset_token": reset_token},  # Dev only
+            "message": "If the email exists, a password reset link has been sent.",
         }
 
     # ── Reset Password ─────────────────────────────────────────

@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
 import logging
-import math
 from typing import Optional
 from ..repositories.forecast_repository import ForecastRepository
 from ..services.weather_service import WeatherService
-from ..preprocess.feature_engineering import prepare_feature_vector
 from ..utils.model_loader import ModelLoader
 from ..utils.confidence_calculator import calculate_forecast_confidence
 from ..utils.helpers import utcnow
