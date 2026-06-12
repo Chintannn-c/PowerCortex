@@ -11,7 +11,7 @@ from app.core.dependencies import get_current_user
 from app.utils.model_loader import ModelLoader
 
 # Bypass auth for testing
-app.dependency_overrides[get_current_user] = lambda: {"username": "test_user", "email": "test@example.com"}
+app.dependency_overrides[get_current_user] = lambda: {"_id": "60d5ec4b9b1d8b2d888f4e12", "username": "test_user", "email": "test@example.com"}
 
 class TestTransformerHealthModule(unittest.TestCase):
     

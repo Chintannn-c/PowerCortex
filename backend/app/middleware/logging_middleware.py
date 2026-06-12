@@ -87,6 +87,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 
                 def handle_audit_error(t):
                     try:
+                        if t.cancelled():
+                            return
                         t.result()
                     except Exception as ex:
                         logger.error(f"Background audit log write failed: {ex}")

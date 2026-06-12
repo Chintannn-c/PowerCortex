@@ -14,6 +14,7 @@ PROTECTED_ROUTES = [
 
 def test_auth_bypasses():
     print("Starting API Authentication Bypass Audit...")
+    app.dependency_overrides.clear()
     client = TestClient(app)
     failed = False
     

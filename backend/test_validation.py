@@ -14,25 +14,42 @@ from app.services.validation_service import ValidationService
 from app.core.database import get_database
 
 # Override dependency to bypass auth
-app.dependency_overrides[get_current_user] = lambda: {"username": "admin", "email": "admin@guvnl.gov.in"}
+app.dependency_overrides[get_current_user] = lambda: {"_id": "60d5ec4b9b1d8b2d888f4e12", "username": "admin", "email": "admin@guvnl.gov.in"}
 
 class TestDataValidationLayer(unittest.TestCase):
 
     def setUp(self):
         self.client_ctx = TestClient(app)
         self.client = self.client_ctx.__enter__()
-        self.db = get_database()
-        self.val_service = ValidationService(self.db)
-        self.loop = asyncio.get_event_loop()
+        try:
+            self.loop = asyncio.get_event_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
 
     def tearDown(self):
+        if hasattr(self, "_clients_by_loop"):
+            for client in self._clients_by_loop.values():
+                client.close()
+            self._clients_by_loop.clear()
         self.client_ctx.__exit__(None, None, None)
+
+    def get_service(self):
+        from motor.motor_asyncio import AsyncIOMotorClient
+        from app.core.config import settings
+        if not hasattr(self, "_clients_by_loop"):
+            self._clients_by_loop = {}
+        if self.loop not in self._clients_by_loop:
+            self._clients_by_loop[self.loop] = AsyncIOMotorClient(settings.MONGODB_URL)
+        db = self._clients_by_loop[self.loop][settings.DATABASE_NAME]
+        return ValidationService(db)
 
     def test_load_validation(self):
         """Verify load forecast validations and rule checks."""
+        val_service = self.get_service()
         # 1. Test normal load validation
         res = self.loop.run_until_complete(
-            self.val_service.validate_load_forecast(
+            val_service.validate_load_forecast(
                 predicted_demand=38000.0,
                 temperature=25.0,
                 hour=12,
@@ -45,7 +62,7 @@ class TestDataValidationLayer(unittest.TestCase):
 
         # 2. Test extreme temperature (AC load expected)
         res_hot = self.loop.run_until_complete(
-            self.val_service.validate_load_forecast(
+            val_service.validate_load_forecast(
                 predicted_demand=46000.0,
                 temperature=42.0,
                 hour=14,
@@ -56,7 +73,7 @@ class TestDataValidationLayer(unittest.TestCase):
 
         # 3. Test out of bounds demand
         res_out = self.loop.run_until_complete(
-            self.val_service.validate_load_forecast(
+            val_service.validate_load_forecast(
                 predicted_demand=60000.0,
                 temperature=25.0,
                 hour=12,
@@ -69,9 +86,10 @@ class TestDataValidationLayer(unittest.TestCase):
 
     def test_renewable_validation(self):
         """Verify Solar & Wind forecast validations."""
+        val_service = self.get_service()
         # 1. Test solar nighttime or normal check
         res_night = self.loop.run_until_complete(
-            self.val_service.validate_renewable_forecast(
+            val_service.validate_renewable_forecast(
                 solar_forecast=500.0,
                 wind_forecast=100.0,
                 temp=22.0,
@@ -84,7 +102,7 @@ class TestDataValidationLayer(unittest.TestCase):
         
         # 2. Test Wind Turbine Cut-in/Cut-out Limit
         res_wind_low = self.loop.run_until_complete(
-            self.val_service.validate_renewable_forecast(
+            val_service.validate_renewable_forecast(
                 solar_forecast=0.0,
                 wind_forecast=200.0,
                 temp=25.0,
@@ -99,9 +117,10 @@ class TestDataValidationLayer(unittest.TestCase):
 
     def test_fault_validation(self):
         """Verify fault validation engineering rules and consensus."""
+        val_service = self.get_service()
         # 1. Normal voltage, Sage predicted (conflict)
         res = self.loop.run_until_complete(
-            self.val_service.validate_fault_detection(
+            val_service.validate_fault_detection(
                 voltage=220.0,
                 current=10.0,
                 frequency=50.0,
@@ -114,7 +133,7 @@ class TestDataValidationLayer(unittest.TestCase):
 
         # 2. Overload verification
         res_overload = self.loop.run_until_complete(
-            self.val_service.validate_fault_detection(
+            val_service.validate_fault_detection(
                 voltage=220.0,
                 current=30.0, # > 25A
                 frequency=50.0,
@@ -127,9 +146,10 @@ class TestDataValidationLayer(unittest.TestCase):
 
     def test_theft_validation(self):
         """Verify theft validation checks."""
+        val_service = self.get_service()
         # 1. Theft flagged, but consumption is above average (conflict)
         res = self.loop.run_until_complete(
-            self.val_service.validate_theft_detection(
+            val_service.validate_theft_detection(
                 consumer_id="CN-12345",
                 consumption=150.0,
                 avg_consumption=100.0,
@@ -142,7 +162,7 @@ class TestDataValidationLayer(unittest.TestCase):
 
         # 2. Low power factor tampering flag
         res_pf = loop_pf = self.loop.run_until_complete(
-            self.val_service.validate_theft_detection(
+            val_service.validate_theft_detection(
                 consumer_id="CN-67890",
                 consumption=40.0,
                 avg_consumption=100.0,
@@ -155,9 +175,10 @@ class TestDataValidationLayer(unittest.TestCase):
 
     def test_transformer_validation(self):
         """Verify transformer health validations."""
+        val_service = self.get_service()
         # 1. Hot winding temperature conflict
         res = self.loop.run_until_complete(
-            self.val_service.validate_transformer_health(
+            val_service.validate_transformer_health(
                 asset_id="TR-X1",
                 temp=98.0, # Critical (> 95)
                 voltage=220.0,

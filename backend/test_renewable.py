@@ -22,7 +22,7 @@ class TestRenewableForecast(unittest.TestCase):
     
     def test_model_prediction(self):
         """Test the ML inference outputs for solar and wind generation."""
-        solar, wind = RenewablePredictor.predict_renewables(
+        solar, wind, _ = RenewablePredictor.predict_renewables(
             temp=34.0,
             humidity=65.0,
             wind_speed=13.0,

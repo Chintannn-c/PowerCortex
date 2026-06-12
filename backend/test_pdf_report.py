@@ -10,7 +10,7 @@ from app.main import app
 from app.core.dependencies import get_current_user
 
 # Bypass auth for testing
-app.dependency_overrides[get_current_user] = lambda: {"username": "admin", "email": "admin@guvnl.gov.in"}
+app.dependency_overrides[get_current_user] = lambda: {"_id": "60d5ec4b9b1d8b2d888f4e12", "username": "admin", "email": "admin@guvnl.gov.in"}
 
 class TestPdfReportGeneration(unittest.TestCase):
 

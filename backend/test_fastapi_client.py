@@ -9,7 +9,7 @@ from app.main import app
 from app.core.dependencies import get_current_user
 
 # Mock dependency get_current_user to bypass authentication
-app.dependency_overrides[get_current_user] = lambda: {"username": "test_user", "email": "test@example.com"}
+app.dependency_overrides[get_current_user] = lambda: {"_id": "60d5ec4b9b1d8b2d888f4e12", "username": "test_user", "email": "test@example.com"}
 
 print("Hitting /api/forecast/dashboard with TestClient lifespan...")
 try:
