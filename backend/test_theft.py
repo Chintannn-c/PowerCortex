@@ -20,6 +20,38 @@ class TestTheftDetection(unittest.TestCase):
         # Force model loading if not already loaded
         ModelLoader.load_theft_model()
 
+    def setUp(self):
+        # Reset and seed collection synchronously using PyMongo to avoid async loop conflicts
+        from pymongo import MongoClient
+        from app.core.config import settings
+        from datetime import datetime, timedelta, timezone
+
+        mongo_client = MongoClient(settings.MONGODB_URL)
+        db = mongo_client[settings.DATABASE_NAME]
+
+        # Clear theft_alerts collection
+        db.theft_alerts.delete_many({})
+
+        now = datetime.now(timezone.utc)
+        # Seed CN-88029
+        db.theft_alerts.insert_one({
+            "consumer_id": "CN-88029",
+            "consumer_name": "Consumer A",
+            "sector": "Sector 4",
+            "city": settings.DEFAULT_CITY,
+            "current_consumption": 420.0,
+            "avg_consumption": 1180.0,
+            "power_factor": 0.72,
+            "monthly_usage": [1250, 1190, 1230, 1175, 420],
+            "theft_probability": 91.2,
+            "risk_level": "High Risk",
+            "deviation_percentage": -64.6,
+            "is_suspicious": True,
+            "status": "Active",
+            "created_at": now - timedelta(hours=1)
+        })
+        mongo_client.close()
+
     def test_model_loading(self):
         """Verify the theft detection model and scaler are loaded properly."""
         self.assertIsNotNone(ModelLoader._theft_model, "Isolation Forest model should not be None")
