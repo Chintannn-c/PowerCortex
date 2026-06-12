@@ -12,10 +12,8 @@ from ..core.exceptions import ModelUnavailableError
 from ..core.grid_constants import (
     GRID_BASELINE_DEMAND_MW,
     SOURCE_LSTM_MODEL, 
-    SOURCE_HEURISTIC_FALLBACK,
     SOURCE_KERAS_MLP_MODEL,
-    SOURCE_ISOLATION_FOREST,
-    SOURCE_RULE_BASED_FALLBACK
+    SOURCE_ISOLATION_FOREST
 )
 
 logger = logging.getLogger("powercortex.ml.loader")
@@ -24,6 +22,9 @@ logger = logging.getLogger("powercortex.ml.loader")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MODEL_PATH = os.path.join(BASE_DIR, "data", "Electricity Demand Data", "lstm_demand_model.keras")
 METADATA_PATH = os.path.join(BASE_DIR, "data", "Electricity Demand Data", "lstm_metadata.json")
+HASHES_PATH = os.path.join(BASE_DIR, "models", "model_hashes.json")
+
+from .model_security import verify_file_hash, load_model_hashes, SecurityError
 
 class HeuristicDemandPredictor:
     """
@@ -95,6 +96,8 @@ class ModelLoader:
     _system_health_model: Any = None
     _system_health_scaler: Any = None
     
+    _model_hashes: dict = None
+    
     # Evaluation metrics
     _mae: float = 481.72
     _rmse: float = 650.83
@@ -125,7 +128,11 @@ class ModelLoader:
             # Attempt to import TensorFlow and load the LSTM model
             import tensorflow as tf
             if os.path.exists(MODEL_PATH):
+                if cls._model_hashes is None:
+                    cls._model_hashes = load_model_hashes(HASHES_PATH)
+                    
                 logger.info(f"Loading Keras LSTM model from {MODEL_PATH}...")
+                verify_file_hash(MODEL_PATH, cls._model_hashes)
                 cls._model = tf.keras.models.load_model(MODEL_PATH)
                 logger.info("LSTM model loaded successfully. Creating tf.functions...")
                 
@@ -285,24 +292,10 @@ class ModelLoader:
                 if not settings.ALLOW_MODEL_FALLBACKS:
                     raise ModelUnavailableError("Demand LSTM inference failed and heuristic fallback is disabled.") from e
                 
-        # Fallback prediction if TensorFlow/Keras model is not active
         if not settings.ALLOW_MODEL_FALLBACKS:
-            raise ModelUnavailableError("Demand LSTM model is not loaded and heuristic fallback is disabled.")
-
-        last_val = hist[-1]
-        temp = features.get("temperature", 25.0)
-        temp_factor = 0.0
-        if temp > 22.0:
-            temp_factor = (temp - 22.0) * 150.0
-        elif temp < 15.0:
-            temp_factor = (15.0 - temp) * -100.0
-            
-        hour = features.get("hour", 12)
-        hour_factor = math.sin((hour - 4) * math.pi / 12) * 1200.0
-        
-        prediction = last_val * 0.9 + (last_val + hour_factor + temp_factor) * 0.1
-        
-        return float(round(prediction, 2)), SOURCE_HEURISTIC_FALLBACK
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="Demand LSTM model is not loaded. Ghost data disabled in production.")
+        raise ModelUnavailableError("Ghost data disabled.")
 
     @classmethod
     def get_timeline_data(cls) -> list[dict]:
@@ -346,29 +339,11 @@ class ModelLoader:
                 predictions = [float(round(val, 2)) for val in pred_mws]
             except Exception as e:
                 logger.exception("Batch prediction in timeline data failed.")
-                if not settings.ALLOW_MODEL_FALLBACKS:
-                    return []
-                predictions = []
-                for idx, hist in enumerate(hist_sequences):
-                    features = {
-                        "historical_demand": hist,
-                        "temperature": 25.0,
-                        "hour": time_points[idx].hour,
-                        "weekday": time_points[idx].weekday(),
-                    }
-                    pred_val, _ = cls.predict_demand(features)
-                    predictions.append(pred_val)
+                from fastapi import HTTPException
+                raise HTTPException(status_code=503, detail="Batch timeline prediction failed. Ghost data disabled in production.")
         else:
-            predictions = []
-            for idx, hist in enumerate(hist_sequences):
-                features = {
-                    "historical_demand": hist,
-                    "temperature": 25.0,
-                    "hour": time_points[idx].hour,
-                    "weekday": time_points[idx].weekday(),
-                }
-                pred_val, _ = cls.predict_demand(features)
-                predictions.append(pred_val)
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="Demand LSTM model is not loaded. Ghost data disabled in production.")
                 
         chart_points = []
         for idx in range(len(time_points)):
@@ -414,29 +389,11 @@ class ModelLoader:
                 future_predictions = [float(round(val, 2)) for val in pred_mws]
             except Exception as e:
                 logger.exception("Recursive prediction in future forecast failed.")
-                if not settings.ALLOW_MODEL_FALLBACKS:
-                    return []
-                current_seq = scaled_seq.copy()
-                for h in range(hours):
-                    try:
-                        input_seq = current_seq.reshape(1, 24, 1)
-                        import tensorflow as tf
-                        pred_val = cls._model(tf.convert_to_tensor(input_seq, dtype=tf.float32), training=False).numpy()[0][0]
-                    except Exception:
-                        pred_val = current_seq[-1, 0]
-                    future_predictions.append((pred_val - cls._scaler_min) / cls._scaler_scale)
-                    current_seq = np.append(current_seq[1:], [[pred_val]], axis=0)
+                from fastapi import HTTPException
+                raise HTTPException(status_code=503, detail="Recursive future forecast failed. Ghost data disabled in production.")
         else:
-            current_seq = scaled_seq.copy()
-            for h in range(hours):
-                hour = (cls._df.index[target_idx] + pd.Timedelta(hours=h+1)).hour
-                base_scaled = 0.4
-                oscillation = math.sin((hour - 4) * math.pi / 12) * 0.12
-                pred_scaled = current_seq[-1, 0] * 0.92 + (base_scaled + oscillation) * 0.08
-                
-                future_predictions.append((pred_scaled - cls._scaler_min) / cls._scaler_scale)
-                current_seq = np.append(current_seq[1:], [[pred_scaled]], axis=0)
-            future_predictions = [float(round(val, 2)) for val in future_predictions]
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="Demand LSTM model is not loaded. Ghost data disabled in production.")
             
         start_time = cls._df.index[target_idx] + pd.Timedelta(hours=1)
         forecast_points = []
@@ -463,10 +420,16 @@ class ModelLoader:
         logger.info(f"Checking for transformer Keras model at {model_path}...")
         if os.path.exists(model_path) and os.path.exists(scaler_path):
             try:
+                if cls._model_hashes is None:
+                    cls._model_hashes = load_model_hashes(HASHES_PATH)
+                    
+                verify_file_hash(model_path, cls._model_hashes)
+                verify_file_hash(scaler_path, cls._model_hashes)
+                
                 import tensorflow as tf
                 cls._transformer_model = tf.keras.models.load_model(model_path)
                 with open(scaler_path, 'rb') as f:
-                    cls._transformer_scaler = pickle.load(f)
+                    cls._transformer_scaler = pickle.load(f)  # nosec B301
                 logger.info("Transformer health Keras model and scaler loaded successfully.")
             except Exception as e:
                 logger.exception("Failed to load transformer Keras model.")
@@ -497,29 +460,9 @@ class ModelLoader:
                 
         # High-fidelity fallback heuristics if model loading fails
         if not settings.ALLOW_MODEL_FALLBACKS:
-            raise ModelUnavailableError("Transformer health model is not loaded and fallback is disabled.")
-
-        health = 100.0
-        if temperature > 80.0:
-            health -= (temperature - 80.0) * 1.2
-        if temperature > 95.0:
-            health -= (temperature - 95.0) * 1.8
-            
-        volt_dev = abs(voltage - 11.0)
-        if volt_dev > 0.5:
-            health -= volt_dev * 15.0
-            
-        if current > 350.0:
-            health -= (current - 350.0) * 0.1
-        if oil_level < 80.0:
-            health -= (80.0 - oil_level) * 1.5
-        if load_percentage > 80.0:
-            health -= (load_percentage - 80.0) * 0.8
-            
-        health = max(10.0, min(100.0, health))
-        failure_prob = max(0.0, min(99.0, 100.0 - health))
-        
-        return round(health, 2), round(failure_prob, 2), SOURCE_RULE_BASED_FALLBACK
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="Transformer health model is not loaded. Ghost data disabled in production.")
+        raise ModelUnavailableError("Ghost data disabled.")
 
     @classmethod
     def load_fault_model(cls) -> None:
@@ -535,10 +478,16 @@ class ModelLoader:
         logger.info(f"Checking for fault detection Keras model at {model_path}...")
         if os.path.exists(model_path) and os.path.exists(scaler_path):
             try:
+                if cls._model_hashes is None:
+                    cls._model_hashes = load_model_hashes(HASHES_PATH)
+                    
+                verify_file_hash(model_path, cls._model_hashes)
+                verify_file_hash(scaler_path, cls._model_hashes)
+                
                 import tensorflow as tf
                 cls._fault_model = tf.keras.models.load_model(model_path)
                 with open(scaler_path, 'rb') as f:
-                    cls._fault_scaler = pickle.load(f)
+                    cls._fault_scaler = pickle.load(f)  # nosec B301
                 logger.info("Fault detection Keras model and scaler loaded successfully.")
             except Exception as e:
                 logger.exception("Failed to load fault detection Keras model.")
@@ -579,17 +528,9 @@ class ModelLoader:
                 
         # High-fidelity rule-based fallback if model is not loaded
         if not settings.ALLOW_MODEL_FALLBACKS:
-            raise ModelUnavailableError("Fault detection model is not loaded and rule-based fallback is disabled.")
-
-        # 0: Voltage Sag, 1: Overload, 2: Line Fault, 3: Voltage Swell
-        if voltage < 195.0:
-            return 0, 92.5, SOURCE_RULE_BASED_FALLBACK
-        elif voltage > 245.0:
-            return 3, 91.0, SOURCE_RULE_BASED_FALLBACK
-        elif current > 28.0:
-            return 1, 88.5, SOURCE_RULE_BASED_FALLBACK
-        else:
-            return 2, 78.0, SOURCE_RULE_BASED_FALLBACK
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="Fault detection model is not loaded. Ghost data disabled in production.")
+        raise ModelUnavailableError("Ghost data disabled.")
 
     @classmethod
     def load_theft_model(cls) -> None:
@@ -607,10 +548,16 @@ class ModelLoader:
         logger.info(f"Checking for theft detection Keras model at {model_path}...")
         if os.path.exists(model_path) and os.path.exists(scaler_path):
             try:
+                if cls._model_hashes is None:
+                    cls._model_hashes = load_model_hashes(HASHES_PATH)
+                    
+                verify_file_hash(model_path, cls._model_hashes)
+                verify_file_hash(scaler_path, cls._model_hashes)
+                
                 import tensorflow as tf
                 cls._theft_model = tf.keras.models.load_model(model_path)
                 with open(scaler_path, 'rb') as f:
-                    cls._theft_scaler = pickle.load(f)
+                    cls._theft_scaler = pickle.load(f)  # nosec B301
                 
                 cls._theft_threshold = 0.5  # fallback
                 if os.path.exists(threshold_path):
@@ -682,20 +629,9 @@ class ModelLoader:
                 
         # High-fidelity fallback heuristic if model is not loaded
         if not settings.ALLOW_MODEL_FALLBACKS:
-            raise ModelUnavailableError("Theft detection model is not loaded and heuristic fallback is disabled.")
-
-        if deviation <= -50.0:
-            is_suspicious = True
-            probability = 85.0 + abs(deviation) * 0.15
-        elif deviation <= -25.0:
-            is_suspicious = True
-            probability = 60.0 + abs(deviation) * 0.3
-        else:
-            is_suspicious = False
-            probability = 10.0 + max(0.0, deviation) * 0.1
-            
-        probability = min(99.0, max(5.0, probability))
-        return round(probability, 1), is_suspicious, deviation, SOURCE_HEURISTIC_FALLBACK
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="Theft detection model is not loaded. Ghost data disabled in production.")
+        raise ModelUnavailableError("Ghost data disabled.")
 
     @classmethod
     def load_system_health_model(cls) -> None:
@@ -711,10 +647,16 @@ class ModelLoader:
         logger.info(f"Checking for system health Keras model at {model_path}...")
         if os.path.exists(model_path) and os.path.exists(scaler_path):
             try:
+                if cls._model_hashes is None:
+                    cls._model_hashes = load_model_hashes(HASHES_PATH)
+                    
+                verify_file_hash(model_path, cls._model_hashes)
+                verify_file_hash(scaler_path, cls._model_hashes)
+                
                 import tensorflow as tf
                 cls._system_health_model = tf.keras.models.load_model(model_path)
                 with open(scaler_path, 'rb') as f:
-                    cls._system_health_scaler = pickle.load(f)
+                    cls._system_health_scaler = pickle.load(f)  # nosec B301
                 logger.info("System health Keras model and scaler loaded successfully.")
             except Exception as e:
                 logger.exception("Failed to load system health Keras model.")
@@ -745,26 +687,6 @@ class ModelLoader:
                 
         # High-fidelity fallback heuristics if model is not loaded
         if not settings.ALLOW_MODEL_FALLBACKS:
-            raise ModelUnavailableError("System health model is not loaded and fallback is disabled.")
-
-        health = 100.0
-        if db_connected == 0.0:
-            health -= 45.0
-        if cpu_usage > 70.0:
-            health -= (cpu_usage - 70.0) * 1.5
-        if memory_usage > 80.0:
-            health -= (memory_usage - 80.0) * 2.0
-        if network_latency > 150.0:
-            health -= (network_latency - 150.0) * 0.1
-        if api_latency > 100.0:
-            health -= (api_latency - 100.0) * 0.2
-            
-        health = max(10.0, min(100.0, health))
-        failure_prob = 100.0 - health
-        if health < 50.0:
-            failure_prob *= 1.2
-        else:
-            failure_prob *= 0.8
-        failure_prob = max(0.0, min(99.0, failure_prob))
-        
-        return round(health, 2), round(failure_prob, 2)
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="System health model is not loaded. Ghost data disabled in production.")
+        raise ModelUnavailableError("Ghost data disabled.")

@@ -21,7 +21,22 @@ def get_forecasting_service() -> ForecastingService:
     repository = ForecastRepository(db)
     return ForecastingService(repository)
 
-@router.get("/hour", response_model=ForecastResponse, summary="Get next hour electricity demand forecast")
+@router.get(
+    "/hour", 
+    response_model=ForecastResponse, 
+    summary="Get next hour electricity demand forecast",
+    responses={
+        200: {
+            "description": "Successful retrieval of hourly forecast",
+            "content": {
+                "application/json": {
+                    "example": {"success": True, "forecast": {"predicted_demand": 42000, "unit": "MW", "confidence": 96.4}}
+                }
+            }
+        },
+        500: {"description": "Internal Server Error"}
+    }
+)
 async def get_hourly_forecast(
     current_user: dict = Depends(get_current_user),
     service: ForecastingService = Depends(get_forecasting_service)
@@ -45,7 +60,21 @@ async def get_hourly_forecast(
             detail={"success": False, "message": f"Error retrieving hourly forecast: {str(e)}"}
         )
 
-@router.get("/day", response_model=ForecastResponse, summary="Get tomorrow peak demand forecast")
+@router.get(
+    "/day", 
+    response_model=ForecastResponse, 
+    summary="Get tomorrow peak demand forecast",
+    responses={
+        200: {
+            "description": "Successful retrieval of daily forecast",
+            "content": {
+                "application/json": {
+                    "example": {"success": True, "forecast": {"predicted_demand": 44500, "unit": "MW", "confidence": 94.2}}
+                }
+            }
+        }
+    }
+)
 async def get_daily_forecast(
     current_user: dict = Depends(get_current_user),
     service: ForecastingService = Depends(get_forecasting_service)
@@ -69,7 +98,21 @@ async def get_daily_forecast(
             detail={"success": False, "message": f"Error retrieving daily forecast: {str(e)}"}
         )
 
-@router.get("/week", response_model=ForecastResponse, summary="Get next week average demand forecast")
+@router.get(
+    "/week", 
+    response_model=ForecastResponse, 
+    summary="Get next week average demand forecast",
+    responses={
+        200: {
+            "description": "Successful retrieval of weekly forecast",
+            "content": {
+                "application/json": {
+                    "example": {"success": True, "forecast": {"predicted_demand": 41200, "unit": "MW", "confidence": 89.5}}
+                }
+            }
+        }
+    }
+)
 async def get_weekly_forecast(
     current_user: dict = Depends(get_current_user),
     service: ForecastingService = Depends(get_forecasting_service)
@@ -93,7 +136,20 @@ async def get_weekly_forecast(
             detail={"success": False, "message": f"Error retrieving weekly forecast: {str(e)}"}
         )
 
-@router.post("/generate", summary="Manually trigger new forecast generation run")
+@router.post(
+    "/generate", 
+    summary="Manually trigger new forecast generation run",
+    responses={
+        200: {
+            "description": "Forecast successfully generated",
+            "content": {
+                "application/json": {
+                    "example": {"success": True, "message": "Hourly forecast generated and saved.", "data": {"predicted_demand": 42100}}
+                }
+            }
+        }
+    }
+)
 async def generate_new_forecast(
     body: ForecastGenerateRequest,
     current_user: dict = Depends(get_current_user),

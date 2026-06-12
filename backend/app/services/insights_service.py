@@ -107,7 +107,7 @@ class InsightsService:
             general_insights = dashboard_summary.get('insights', [])
             
             for index, gi_text in enumerate(general_insights):
-                # We'll just fake a slightly staggered timestamp for presentation
+                # Use current system time for the live dashboard stream
                 dt = datetime.now()
                 
                 raw_insights.append({

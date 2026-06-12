@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSocketDisconnect, Query
+from fastapi.responses import StreamingResponse
 from typing import List, Dict, Any
+import json
 import asyncio
+import logging
 from ..core.dependencies import get_current_user
+
+logger = logging.getLogger("powercortex.routers.insights")
 from ..core.security import decode_access_token
 from ..services.insights_service import InsightsService
 
@@ -43,10 +48,30 @@ async def websocket_insights(websocket: WebSocket, token: str = Query(...)):
             await asyncio.sleep(15)
     except WebSocketDisconnect:
         # Client disconnected
-        pass
+        logger.info("WebSocket disconnected by client.")
     except Exception as e:
         # Unexpected error
         try:
             await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
         except Exception as e:
             logger.error(f"Handled error: {e}")
+
+async def sse_event_generator():
+    """Generator for Server-Sent Events."""
+    try:
+        while True:
+            data = await InsightsService.get_aggregated_insights()
+            # SSE format requires 'data: ...\n\n'
+            payload = json.dumps({"success": True, "data": data})
+            yield f"event: insights_update\ndata: {payload}\n\n"
+            await asyncio.sleep(15)
+    except asyncio.CancelledError:
+        logger.info("SSE client disconnected.")
+
+@router.get("/stream", summary="Server-Sent Events for Live Insights")
+async def stream_insights(current_user: dict = Depends(get_current_user)):
+    """
+    Subscribe to a live stream of AI insights via Server-Sent Events (SSE).
+    Perfect for lightweight clients that don't need full WebSockets.
+    """
+    return StreamingResponse(sse_event_generator(), media_type="text/event-stream")

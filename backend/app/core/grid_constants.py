@@ -47,7 +47,6 @@ GRID_BASELINE_DEMAND_MW: float = _get_val("GRID_BASELINE_DEMAND_MW", 41134.0)
 GRID_PEAK_DEMAND_MW: float = _get_val("GRID_PEAK_DEMAND_MW", 42116.0)
 GRID_MIN_DEMAND_MW: float = _get_val("GRID_MIN_DEMAND_MW", 28000.0)
 GRID_MAX_DEMAND_MW: float = _get_val("GRID_MAX_DEMAND_MW", 48000.0)
-HEURISTIC_FALLBACK_DEMAND_MW: float = _get_val("HEURISTIC_FALLBACK_DEMAND_MW", 30000.0)
 
 # ── Forecast Metrics Baselines ──────────────────────────────────
 FORECAST_DEFAULT_MAE: float = _get_val("FORECAST_DEFAULT_MAE", 481.72)
@@ -111,9 +110,6 @@ SOURCE_LSTM_MODEL = "lstm_model"
 SOURCE_KERAS_DL_MODEL = "keras_dl_model"
 SOURCE_KERAS_MLP_MODEL = "keras_mlp_model"
 SOURCE_ISOLATION_FOREST = "isolation_forest_model"
-SOURCE_HEURISTIC_FALLBACK = "heuristic_fallback"
-SOURCE_RULE_BASED_FALLBACK = "rule_based_fallback"
-SOURCE_HARDCODED_FALLBACK = "hardcoded_secondary"
 SOURCE_SEED_DATA = "seed"
 SOURCE_OPENWEATHERMAP = "openweathermap_api"
 SOURCE_WEATHER_UNAVAILABLE = "unavailable"

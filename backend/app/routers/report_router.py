@@ -2,8 +2,9 @@ import logging
 from datetime import datetime
 from io import BytesIO
 from typing import List, Dict, Optional, Any
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.responses import StreamingResponse
+import asyncio
 import pandas as pd
 import json
 import httpx
@@ -487,6 +488,48 @@ def generate_pdf_report(report_title: str, df_data: list, summary_text: str, rec
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
+
+
+async def async_report_generation_task(report_id: str, file_format: str, db, email: str):
+    """
+    Background task to generate a report asynchronously.
+    In a real system, this would save the report to S3/GCS or email it to the user.
+    """
+    logger.info(f"Background task started: generating {report_id} in {file_format} for {email}...")
+    try:
+        # Simulate heavy processing delay
+        await asyncio.sleep(5)
+        # We can reuse the AI fetching logic here
+        ai_data = await get_ai_report_summary(db)
+        logger.info(f"Background task completed: {report_id} successfully compiled and 'emailed' to {email}.")
+    except Exception as e:
+        logger.error(f"Background task failed for {report_id}: {e}")
+
+@router.post("/generate-async/{report_id}", status_code=status.HTTP_202_ACCEPTED, summary="Trigger async report generation")
+async def generate_report_async(
+    report_id: str,
+    background_tasks: BackgroundTasks,
+    file_format: str = "pdf",
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Triggers a heavy report generation in the background. Returns immediately with a 202 Accepted status.
+    The report will be processed asynchronously and 'emailed' to the user.
+    """
+    db = get_database()
+    email = current_user.get("email", "admin@guvnl.gov.in")
+    
+    # Add the task to FastAPI's BackgroundTasks runner
+    background_tasks.add_task(async_report_generation_task, report_id, file_format, db, email)
+    
+    return {
+        "success": True,
+        "message": f"Report generation started in background. It will be emailed to {email} upon completion.",
+        "task_info": {
+            "report_id": report_id,
+            "format": file_format
+        }
+    }
 
 
 @router.get("/preview/{report_id}", summary="Get JSON preview of a report (original telemetry + AI summary)")

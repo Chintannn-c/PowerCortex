@@ -7,7 +7,6 @@ from ..core.exceptions import ModelUnavailableError
 from ..core.config_loader import config
 from ..core.grid_constants import (
     SOURCE_KERAS_DL_MODEL,
-    SOURCE_HEURISTIC_FALLBACK,
 )
 
 logger = logging.getLogger("powercortex.ml.renewable_predictor")
@@ -47,25 +46,6 @@ class RenewablePredictor:
             return False
 
     @classmethod
-    def _heuristic_predict(cls, temp: float, humidity: float, wind_speed: float, cloud_cover: float, city: str = "ahmedabad"):
-        """Physics-based heuristic fallback. Returns (solar, wind)."""
-        solar_gen = 1787.57 * (1.0 - cloud_cover / 100.0) * (1.0 - 0.005 * abs(temp - 25.0)) * (1.0 - 0.002 * humidity)
-        wind_gen = 321.4 * (wind_speed / 13.0) ** 2 * (1.0 - 0.002 * abs(temp - 20.0))
-        
-        wind_cut_in = config.get("renewable.wind_cut_in_speed", 3.5)
-        wind_cut_out = config.get("renewable.wind_cut_out_speed", 25.0)
-        
-        if wind_speed < wind_cut_in or wind_speed > wind_cut_out:
-            wind_gen = 0.0
-
-        solar_cap = config.get(f"renewable.regions.gujarat.{city}.solar_capacity_mw", 5000.0)
-        wind_cap = config.get(f"renewable.regions.gujarat.{city}.wind_capacity_mw", 2000.0)
-
-        solar_gen = max(0.0, min(solar_cap, solar_gen))
-        wind_gen = max(0.0, min(wind_cap, wind_gen))
-        return round(solar_gen, 1), round(wind_gen, 1)
-
-    @classmethod
     def predict_renewables(cls, temp: float, humidity: float, wind_speed: float, cloud_cover: float, city: str = "ahmedabad"):
         """
         Predict solar and wind generation.
@@ -74,10 +54,8 @@ class RenewablePredictor:
         cls.load_models()
         
         if not cls._models_loaded:
-            if not settings.ALLOW_MODEL_FALLBACKS:
-                raise ModelUnavailableError("Renewable DL models are not loaded and heuristic fallback is disabled.")
-            solar_gen, wind_gen = cls._heuristic_predict(temp, humidity, wind_speed, cloud_cover, city)
-            return solar_gen, wind_gen, SOURCE_HEURISTIC_FALLBACK
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="Renewable DL models are not loaded and ghost data fallbacks are disabled in production.")
 
         try:
             # Scale features
@@ -106,7 +84,5 @@ class RenewablePredictor:
             return round(solar_pred, 1), round(wind_pred, 1), SOURCE_KERAS_DL_MODEL
         except Exception as exc:
             logger.exception("Error during renewable DL model inference.")
-            if not settings.ALLOW_MODEL_FALLBACKS:
-                raise ModelUnavailableError("Renewable DL inference failed and heuristic fallback is disabled.") from exc
-            solar_gen, wind_gen = cls._heuristic_predict(temp, humidity, wind_speed, cloud_cover, city)
-            return solar_gen, wind_gen, SOURCE_HEURISTIC_FALLBACK
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="Renewable DL inference failed. Ghost data fallbacks disabled.") from exc

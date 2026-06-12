@@ -1,18 +1,4 @@
 {
-    "backend": [
-        {
-            "file": "c:\\Flutter\\guvnl_project\\backend\\app\\routers\\insights_router.py",
-            "name": "insights_router.py",
-            "issues": [
-                {
-                    "type": "Bug",
-                    "line": 52,
-                    "severity": "High",
-                    "issue": "Silenced broad exception with pass",
-                    "fix": "Properly log or handle the exception."
-                }
-            ]
-        }
-    ],
+    "backend": [],
     "frontend": []
 }

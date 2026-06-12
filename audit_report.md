@@ -23,15 +23,15 @@ JWT tokens and secrets were found hardcoded or implicitly handled without secure
 ## 16. GHOST DATA AUDIT
 
 - **File:** backend\app\core\grid_constants.py | **Risk:** Medium | **Fix:** Remove 'fallback' logic
-- **File:** backend\app\core\grid_constants.py | **Risk:** Medium | **Fix:** Remove 'fallback' logic
-- **File:** backend\app\core\grid_constants.py | **Risk:** Medium | **Fix:** Remove 'heuristic' logic
-- **File:** backend\app\ml\renewable_predictor.py | **Risk:** Medium | **Fix:** Remove 'heuristic' logic
 - **File:** backend\app\ml\renewable_predictor.py | **Risk:** Medium | **Fix:** Remove 'fallback' logic
-- **File:** backend\app\ml\renewable_predictor.py | **Risk:** Medium | **Fix:** Remove 'heuristic' logic
 - **File:** backend\app\ml\renewable_predictor.py | **Risk:** Medium | **Fix:** Remove 'fallback' logic
-- **File:** backend\app\ml\renewable_predictor.py | **Risk:** Medium | **Fix:** Remove 'heuristic' logic
-- **File:** backend\app\ml\renewable_predictor.py | **Risk:** Medium | **Fix:** Remove 'heuristic' logic
-- **File:** backend\app\ml\renewable_predictor.py | **Risk:** Medium | **Fix:** Remove 'fallback' logic
+- **File:** backend\app\repositories\forecast_repository.py | **Risk:** Medium | **Fix:** Remove 'generated' logic
+- **File:** backend\app\repositories\transformer_repository.py | **Risk:** Medium | **Fix:** Remove 'fallback' logic
+- **File:** backend\app\routers\assistant_router.py | **Risk:** Medium | **Fix:** Remove 'heuristic' logic
+- **File:** backend\app\routers\auth_router.py | **Risk:** Medium | **Fix:** Remove 'mock' logic
+- **File:** backend\app\routers\forecast_router.py | **Risk:** Medium | **Fix:** Remove 'generated' logic
+- **File:** backend\app\routers\forecast_router.py | **Risk:** Medium | **Fix:** Remove 'generated' logic
+- **File:** backend\app\routers\forecast_router.py | **Risk:** Medium | **Fix:** Remove 'generated' logic
 
 ## 17. FILE-BY-FILE REPORT
 
@@ -85,8 +85,6 @@ JWT tokens and secrets were found hardcoded or implicitly handled without secure
 - **Issues Found:**
   - Ghost Data: 'fallback' on line 33
   - Security: Hardcoded 'key' on line 36
-  - Ghost Data: 'fallback' on line 50
-  - Ghost Data: 'heuristic' on line 50
 
 ### backend\app\core\security.py
 - **Purpose:** Backend logic
@@ -101,15 +99,12 @@ JWT tokens and secrets were found hardcoded or implicitly handled without secure
 
 ### backend\app\ml\renewable_predictor.py
 - **Purpose:** Backend logic
-- **Severity:** High
+- **Severity:** Medium
 - **Fix Required:** Yes
 - **Production Impact:** Low
 - **Issues Found:**
-  - Ghost Data: 'heuristic' on line 50
-  - Ghost Data: 'fallback' on line 51
-  - Ghost Data: 'heuristic' on line 51
-  - Ghost Data: 'fallback' on line 78
-  - Ghost Data: 'heuristic' on line 78
+  - Ghost Data: 'fallback' on line 58
+  - Ghost Data: 'fallback' on line 88
 
 ### backend\app\models\audit_log.py
 - **Purpose:** Backend logic
@@ -201,7 +196,9 @@ JWT tokens and secrets were found hardcoded or implicitly handled without secure
 - **Fix Required:** Yes
 - **Production Impact:** Low
 - **Issues Found:**
-  - Ghost Data: 'generated' on line 110
+  - Ghost Data: 'generated' on line 144
+  - Ghost Data: 'generated' on line 147
+  - Ghost Data: 'generated' on line 166
 
 ### backend\app\routers\insights_router.py
 - **Purpose:** Backend logic
@@ -209,7 +206,7 @@ JWT tokens and secrets were found hardcoded or implicitly handled without secure
 - **Fix Required:** Yes
 - **Production Impact:** High
 - **Issues Found:**
-  - Security: Hardcoded 'token' on line 30
+  - Security: Hardcoded 'token' on line 35
 
 ### backend\app\routers\notification_router.py
 - **Purpose:** Backend logic
@@ -229,11 +226,11 @@ JWT tokens and secrets were found hardcoded or implicitly handled without secure
 - **Fix Required:** Yes
 - **Production Impact:** High
 - **Issues Found:**
-  - Ghost Data: 'sample' on line 14
-  - Ghost Data: 'fallback' on line 213
-  - Security: Hardcoded 'key' on line 236
-  - Security: Hardcoded 'key' on line 250
-  - Security: Hardcoded 'api_key' on line 250
+  - Ghost Data: 'sample' on line 15
+  - Ghost Data: 'fallback' on line 214
+  - Security: Hardcoded 'key' on line 237
+  - Security: Hardcoded 'key' on line 251
+  - Security: Hardcoded 'api_key' on line 251
 
 ### backend\app\routers\system_health_router.py
 - **Purpose:** Backend logic
@@ -363,7 +360,6 @@ JWT tokens and secrets were found hardcoded or implicitly handled without secure
 - **Fix Required:** Yes
 - **Production Impact:** High
 - **Issues Found:**
-  - Ghost Data: 'fake' on line 110
   - Security: Hardcoded 'key' on line 123
 
 ### backend\app\services\notification_service.py
@@ -454,11 +450,11 @@ JWT tokens and secrets were found hardcoded or implicitly handled without secure
 - **Fix Required:** Yes
 - **Production Impact:** Low
 - **Issues Found:**
-  - Ghost Data: 'heuristic' on line 28
-  - Ghost Data: 'fallback' on line 30
-  - Ghost Data: 'heuristic' on line 82
-  - Ghost Data: 'heuristic' on line 167
-  - Ghost Data: 'heuristic' on line 175
+  - Ghost Data: 'heuristic' on line 31
+  - Ghost Data: 'fallback' on line 33
+  - Ghost Data: 'heuristic' on line 85
+  - Ghost Data: 'heuristic' on line 176
+  - Ghost Data: 'heuristic' on line 184
 
 ### backend\app\utils\train_dl_theft_model.py
 - **Purpose:** Backend logic

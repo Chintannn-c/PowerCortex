@@ -11,15 +11,13 @@ from ..utils.helpers import utcnow
 
 from ..core.grid_constants import (
     SOURCE_LSTM_MODEL,
-    SOURCE_HEURISTIC_FALLBACK,
-    SOURCE_HARDCODED_FALLBACK,
+    SOURCE_MODEL_UNAVAILABLE,
     FORECAST_DEFAULT_MAE,
     FORECAST_DEFAULT_RMSE,
     FORECAST_DEFAULT_MAPE,
     FORECAST_DEFAULT_CONFIDENCE_NEXT_HOUR,
     FORECAST_DEFAULT_CONFIDENCE_NEXT_DAY,
     FORECAST_DEFAULT_CONFIDENCE_NEXT_WEEK,
-    
 )
 from ..core.config_loader import config
 
@@ -64,7 +62,7 @@ class ForecastingService:
                 "created_at": utcnow()
             }
             
-        prediction_source = SOURCE_LSTM_MODEL if ModelLoader.get_model() else SOURCE_HEURISTIC_FALLBACK
+        prediction_source = SOURCE_LSTM_MODEL if ModelLoader.get_model() else SOURCE_MODEL_UNAVAILABLE
 
         if forecast_type == "hourly":
             predicted_demand = future[0]["predicted"]
