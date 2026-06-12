@@ -67,6 +67,8 @@ backend/test_output_*
 *.h5
 *.pkl
 *.joblib
+!backend/app/models/*.keras
+!backend/app/models/*.pkl
 
 # ── OS / Editor ──────────────────────────────────────────
 Thumbs.db
