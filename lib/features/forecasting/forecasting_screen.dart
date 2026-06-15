@@ -96,8 +96,8 @@ class _ForecastingScreenState extends State<ForecastingScreen>
                   isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
               labelStyle: theme.textTheme.labelLarge?.copyWith(fontSize: 13),
               tabs: const [
-                Tab(text: 'Demand Forecasting'),
-                Tab(text: 'Renewable Forecasting'),
+                Tab(text: 'Demand'),
+                Tab(text: 'Renewables'),
               ],
             ),
           ),
@@ -397,10 +397,13 @@ class _ForecastingScreenState extends State<ForecastingScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Demand Forecast Actions',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                const Expanded(
+                  child: Text(
+                    'Demand Forecast Actions',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
                 ),
+                const SizedBox(width: 8),
                 SizedBox(
                   height: 36,
                   child: ElevatedButton.icon(
@@ -723,13 +726,26 @@ class _ForecastingScreenState extends State<ForecastingScreen>
 
   Widget _statItem(BuildContext context, String label, String value, IconData icon) {
     final theme = Theme.of(context);
+    final isMobile = context.isMobile;
     return Column(
       children: [
-        Icon(icon, size: 18, color: AppColors.primaryBlue),
+        Icon(icon, size: isMobile ? 16 : 18, color: AppColors.primaryBlue),
         context.sh(6),
-        Text(value, style: theme.textTheme.labelLarge),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: theme.textTheme.labelLarge?.copyWith(fontSize: isMobile ? 12 : 14),
+          ),
+        ),
         context.sh(2),
-        Text(label, style: theme.textTheme.bodySmall?.copyWith(fontSize: 11)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(fontSize: isMobile ? 9 : 11),
+          ),
+        ),
       ],
     );
   }

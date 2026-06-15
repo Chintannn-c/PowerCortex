@@ -336,10 +336,17 @@ class AuthService:
             }
         )
 
-        return {
+        from ..services.email_service import EmailService
+        EmailService.send_reset_token(user["email"], reset_token)
+
+        response = {
             "success": True,
             "message": "If the email exists, a password reset link has been sent.",
         }
+        if settings.DEBUG:
+            response["token"] = reset_token
+            
+        return response
 
     # ── Reset Password ─────────────────────────────────────────
     async def reset_password(

@@ -51,3 +51,27 @@ class EmailService:
         </html>
         """
         return EmailService.send_email(to_email, subject, html_content)
+
+    @staticmethod
+    def send_reset_token(to_email: str, token: str) -> bool:
+        subject = "PowerCortex Password Reset Request"
+        reset_link = f"{settings.API_BASE_URL}/api/v1/auth/reset-password?token={token}"
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                <h2 style="color: #1E3A8A;">PowerCortex Password Reset</h2>
+                <p>Hello,</p>
+                <p>We received a request to reset the password for your PowerCortex account.</p>
+                <p>To reset your password, please use the following reset token:</p>
+                <div style="background-color: #F3F4F6; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; word-break: break-all; margin: 20px 0; border: 1px solid #E5E7EB;">
+                    {token}
+                </div>
+                <p>Alternatively, you can reset your password directly using this link:</p>
+                <p><a href="{reset_link}" style="color: #1E3A8A; font-weight: bold;">Reset Password Link</a></p>
+                <p>This token and link are valid for 15 minutes.</p>
+                <p style="font-size: 12px; color: #9CA3AF; margin-top: 40px;">If you did not request a password reset, please ignore this email.</p>
+            </body>
+        </html>
+        """
+        return EmailService.send_email(to_email, subject, html_content)
+

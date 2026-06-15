@@ -77,6 +77,11 @@ class WeatherService:
                             "data_source": SOURCE_OPENWEATHERMAP,
                             "city": data.get("name", city or settings.DEFAULT_CITY)
                         }
+                        # Prune expired entries to prevent memory leaks
+                        expired_keys = [k for k, v in cls._cache.items() if (now - v[1]).total_seconds() >= cls._cache_duration_seconds]
+                        for k in expired_keys:
+                            cls._cache.pop(k, None)
+                            
                         cls._cache[cache_key] = (weather_data, now)
                         logger.info(f"Successfully fetched weather from OpenWeatherMap for {cache_key}.")
                         return weather_data

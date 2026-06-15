@@ -72,6 +72,16 @@ class RenewablePredictor:
             raise HTTPException(status_code=503, detail="Renewable DL models are not loaded and ghost data fallbacks are disabled in production.")
 
         try:
+            # Fallback default values if weather data is unavailable (None)
+            if temp is None:
+                temp = 25.0
+            if humidity is None:
+                humidity = 50.0
+            if wind_speed is None:
+                wind_speed = 5.0
+            if cloud_cover is None:
+                cloud_cover = 0.0
+
             # Scale features
             features = np.array([[temp, humidity, wind_speed, cloud_cover]], dtype=np.float32)
             if hasattr(cls._scaler, "feature_names_in_"):

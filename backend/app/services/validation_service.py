@@ -44,7 +44,10 @@ class ValidationService:
         # 1. Weather Checks (Temperature anomaly)
         # Demand is expected to rise with cooling load above 30C or heating below 12C
         weather_api_status = "Online"
-        if temperature > 40.0:
+        if temperature is None:
+            weather_api_status = "Offline"
+            notes_list.append("Weather API offline: Skipping temperature-specific load validation rules.")
+        elif temperature > 40.0:
             notes_list.append("Extreme hot weather alert: High air conditioning load expected.")
         elif temperature < 10.0:
             notes_list.append("Extreme cold weather alert: High heating load expected.")
@@ -135,7 +138,9 @@ class ValidationService:
             solar_forecast = 0.0
             
         # Cloud cover check
-        if cloud_cover > 80.0 and solar_forecast > 400.0:
+        if cloud_cover is None:
+            notes_list.append("Cloud cover data unavailable for solar validation.")
+        elif cloud_cover > 80.0 and solar_forecast > 400.0:
             notes_list.append(f"High cloud cover ({cloud_cover}%) mismatch: Solar output ({solar_forecast} MW) may be over-optimistic.")
             
         # Capacity limit (max solar farm output = 1200 MW)
@@ -147,7 +152,9 @@ class ValidationService:
         # 2. Wind Validation
         # Wind cut-in speed: 3.0 m/s (below this turbines don't spin)
         # Wind cut-out speed: 25.0 m/s (above this turbines brake for safety)
-        if wind_speed < 3.0 and wind_forecast > 20.0:
+        if wind_speed is None:
+            notes_list.append("Wind speed data unavailable for wind validation.")
+        elif wind_speed < 3.0 and wind_forecast > 20.0:
             validated = False
             notes_list.append(f"Low wind speed ({wind_speed} m/s) below cut-in limit (3 m/s). Capping wind output.")
             wind_forecast = 0.0
@@ -165,7 +172,7 @@ class ValidationService:
         confidence = 96.0
         if not validated:
             confidence -= 12.0
-        if cloud_cover > 90.0 and solar_forecast > 200.0:
+        if cloud_cover is not None and cloud_cover > 90.0 and solar_forecast > 200.0:
             confidence -= 10.0
             
         confidence = max(50.0, min(99.0, confidence))

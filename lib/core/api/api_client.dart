@@ -6,9 +6,16 @@ import '../../features/auth/auth_controller.dart';
 import '../config/app_config.dart';
 
 class ApiClient {
-  static String customBaseUrl = '';
+  static String _customBaseUrl = '';
 
-  static String get baseUrl => customBaseUrl.isNotEmpty ? customBaseUrl : AppConfig.apiBaseUrl;
+  static String get customBaseUrl => _customBaseUrl;
+
+  static set customBaseUrl(String value) {
+    _customBaseUrl = value;
+    _instance.dio.options.baseUrl = baseUrl;
+  }
+
+  static String get baseUrl => _customBaseUrl.isNotEmpty ? _customBaseUrl : AppConfig.apiBaseUrl;
   
   late final Dio dio;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();

@@ -28,10 +28,14 @@ class KpiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isMobile = context.isMobile;
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 10 : 16,
+          vertical: 12,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -39,47 +43,57 @@ class KpiCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: iconColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, size: 20, color: iconColor),
+                  child: Icon(icon, size: isMobile ? 18 : 20, color: iconColor),
                 ),
+                const SizedBox(width: 4),
                 const Spacer(),
                 if (change != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: (isPositive ? AppColors.healthy : AppColors.critical)
-                          .withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isPositive ? Icons.trending_up : Icons.trending_down,
-                          size: 14,
-                          color: isPositive ? AppColors.healthy : AppColors.critical,
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: (isPositive ? AppColors.healthy : AppColors.critical)
+                              .withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        context.sw(4),
-                        Text(
-                          change!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: isPositive ? AppColors.healthy : AppColors.critical,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isPositive ? Icons.trending_up : Icons.trending_down,
+                              size: 11,
+                              color: isPositive ? AppColors.healthy : AppColors.critical,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              change!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: isPositive ? AppColors.healthy : AppColors.critical,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 9,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
               ],
             ),
-            context.sh(12),
+            context.sh(8),
             Text(
               title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: isMobile ? 10 : 12,
                 color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
               ),
             ),
@@ -88,17 +102,23 @@ class KpiCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(
-                  value,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: isMobile ? 18 : 24,
+                    ),
                   ),
                 ),
                 if (unit != null) ...[
-                  context.sw(4),
+                  const SizedBox(width: 2),
                   Text(
                     unit!,
                     style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: isMobile ? 9 : 11,
                       color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
                     ),
                   ),
@@ -106,12 +126,14 @@ class KpiCard extends StatelessWidget {
               ],
             ),
             if (description != null) ...[
-              context.sh(6),
+              context.sh(4),
               Text(
                 description!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: isDark ? AppColors.darkTextSecondary.withValues(alpha: 0.8) : AppColors.lightTextSecondary.withValues(alpha: 0.8),
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: FontWeight.w500,
                 ),
               ),

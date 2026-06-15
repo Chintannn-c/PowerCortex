@@ -322,13 +322,12 @@ class AssistantService:
         }
 
         try:
-            import json
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
                 if response.status_code == 200:
                     data = response.json()
                     content_str = data["choices"][0]["message"]["content"]
-                    parsed = json.loads(content_str)
+                    parsed = self._clean_and_parse_json(content_str)
                     return {
                         "success": True,
                         "intent": parsed.get("intent", "answer"),
@@ -343,7 +342,6 @@ class AssistantService:
             openrouter_key = settings.OPENROUTER_API_KEY
             if openrouter_key:
                 try:
-                    import json
                     or_headers = {
                         "Authorization": f"Bearer {openrouter_key}",
                         "Content-Type": "application/json"
@@ -355,7 +353,7 @@ class AssistantService:
                         if response.status_code == 200:
                             data = response.json()
                             content_str = data["choices"][0]["message"]["content"]
-                            parsed = json.loads(content_str)
+                            parsed = self._clean_and_parse_json(content_str)
                             return {
                                 "success": True,
                                 "intent": parsed.get("intent", "answer"),
@@ -369,6 +367,34 @@ class AssistantService:
                     logger.error(f"OpenRouter Search Parser fallback failed: {or_e}")
                     
             return self._heuristic_search_parse(query)
+
+    def _clean_and_parse_json(self, text: str) -> dict:
+        import json
+        import re
+        text_str = text.strip()
+        try:
+            return json.loads(text_str)
+        except json.JSONDecodeError:
+            pass
+            
+        # Try finding JSON block in markdown
+        match = re.search(r"```json\s*(.*?)\s*```", text_str, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group(1).strip())
+            except json.JSONDecodeError:
+                pass
+                
+        # Try finding first { and last }
+        first_brace = text_str.find("{")
+        last_brace = text_str.rfind("}")
+        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+            try:
+                return json.loads(text_str[first_brace:last_brace+1])
+            except json.JSONDecodeError:
+                pass
+                
+        raise ValueError("No valid JSON found in LLM response")
 
     def _heuristic_search_parse(self, query: str) -> Dict[str, any]:
         """Local heuristic parser when LLM is unavailable."""

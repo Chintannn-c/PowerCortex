@@ -222,6 +222,9 @@ class TransformerService:
         for doc in initial_data:
             doc["last_updated"] = now
             doc["data_source"] = SOURCE_SEED_DATA
+            existing = await self.repository.get_by_id(doc["asset_id"])
+            if existing:
+                doc["_id"] = existing["_id"]
             await self.repository.save(doc)
             
         logger.info("Successfully seeded 8 initial transformer assets in MongoDB.")

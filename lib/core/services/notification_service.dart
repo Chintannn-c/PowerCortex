@@ -228,21 +228,18 @@ class NotificationService extends GetxController {
         return;
       }
 
-      String baseHost = "";
-      final fallbackUri = Uri.parse(AppConfig.apiBaseUrl);
-      baseHost = "${fallbackUri.host}:${fallbackUri.port}";
-
-      final options = _api.options;
-      if (options.baseUrl.isNotEmpty) {
-        try {
-          final uri = Uri.parse(options.baseUrl);
-          baseHost = "${uri.host}:${uri.port}";
-        } catch (e) {
-          debugPrint('Failed to parse API base URL: $e');
-        }
+      String baseUrl = _api.options.baseUrl;
+      if (baseUrl.isEmpty) {
+        baseUrl = AppConfig.apiBaseUrl;
       }
 
-      final wsUri = Uri.parse("ws://$baseHost/api/v1/notifications/ws?token=$token");
+      final uri = Uri.parse(baseUrl);
+      final wsScheme = uri.scheme == 'https' ? 'wss' : 'ws';
+      final hostPort = (uri.port == 80 || uri.port == 443 || uri.port == 0)
+          ? uri.host
+          : "${uri.host}:${uri.port}";
+
+      final wsUri = Uri.parse("$wsScheme://$hostPort/api/v1/notifications/ws?token=$token");
       debugPrint("Connecting to WebSocket: $wsUri");
       _wsChannel = WebSocketChannel.connect(wsUri);
       _isConnecting = false;

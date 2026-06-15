@@ -329,6 +329,9 @@ class FaultDetectionService:
 
         for doc in initial_faults:
             doc["data_source"] = SOURCE_SEED_DATA
+            existing = await self.repository.get_by_id(doc["fault_id"])
+            if existing:
+                doc["_id"] = existing["_id"]
             await self.repository.save(doc)
             
         logger.info(f"Successfully seeded {len(initial_faults)} initial faults in MongoDB.")

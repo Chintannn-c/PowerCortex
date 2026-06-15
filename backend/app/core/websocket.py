@@ -1,3 +1,4 @@
+import asyncio
 from typing import List
 from fastapi import WebSocket
 import logging
@@ -11,10 +12,20 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
+        # Start a background task for heartbeat/ping
+        asyncio.create_task(self._ping_loop(websocket))
 
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
+
+    async def _ping_loop(self, websocket: WebSocket):
+        try:
+            while websocket in self.active_connections:
+                await asyncio.sleep(30)
+                await websocket.send_json({"type": "ping"})
+        except Exception:
+            self.disconnect(websocket)
 
     async def send_personal_message(self, message: dict, websocket: WebSocket):
         await websocket.send_json(message)

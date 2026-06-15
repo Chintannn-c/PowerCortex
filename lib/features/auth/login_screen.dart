@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/theme/app_colors.dart';
 import 'auth_controller.dart';
+import '../../core/api/api_client.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   final _signInFormKey = GlobalKey<FormState>();
   final _signUpFormKey = GlobalKey<FormState>();
   
-  // Sign In Controllers
+  // Login Controllers
   final _signInEmailController = TextEditingController();
   final _signInPasswordController = TextEditingController();
   
@@ -157,6 +159,69 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
+  void _showServerConfigDialog() {
+    final configController = TextEditingController(text: ApiClient.baseUrl);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Server Configuration',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Configure the backend API URL for this physical device:',
+                style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: configController,
+                decoration: const InputDecoration(
+                  labelText: 'API Base URL',
+                  hintText: 'http://192.168.1.5:8000',
+                  prefixIcon: Icon(Icons.dns_outlined, size: 20),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: AppColors.lightTextSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final newUrl = configController.text.trim();
+                if (newUrl.isNotEmpty) {
+                  ApiClient.customBaseUrl = newUrl;
+                  Navigator.pop(context);
+                  Get.snackbar(
+                    'Server Updated',
+                    'Connecting to: $newUrl',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: AppColors.healthy,
+                    colorText: Colors.white,
+                  );
+                }
+              },
+              child: Text(
+                'Save',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -164,8 +229,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: Row(
+      body: Stack(
         children: [
+          Row(
+            children: [
           // Left branding panel (desktop/tablet only)
           if (isWide)
             Expanded(
@@ -363,7 +430,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       color: Colors.transparent,
                                       alignment: Alignment.center,
                                       child: Obx(() => Text(
-                                        'Sign In',
+                                        'Login',
                                         style: GoogleFonts.poppins(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
@@ -423,6 +490,24 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+          )],
+          ),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkBorder.withOpacity(0.5) : Colors.grey.shade200.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.dns_outlined, color: AppColors.primaryBlue),
+                  tooltip: 'Server Config',
+                  onPressed: _showServerConfigDialog,
                 ),
               ),
             ),
@@ -561,7 +646,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'Keep me signed in',
+                      'Keep me logged in',
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
@@ -571,7 +656,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 ),
                 context.sh(28),
                 
-                // Sign In Button
+                // Login Button
                 SizedBox(
                   height: 52,
                   child: ElevatedButton(
@@ -595,7 +680,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             ),
                           )
                         : Text(
-                            'Sign In',
+                            'Login',
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -893,7 +978,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         color: AppColors.primaryBlue.withOpacity(0.6),
                       ),
                       Text(
-                        ' Swipe right or tap Sign In above to log in',
+                        ' Swipe right or tap Login above to log in',
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: isDark ? AppColors.darkTextSecondary.withOpacity(0.7) : AppColors.lightTextSecondary.withOpacity(0.7),

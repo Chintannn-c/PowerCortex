@@ -8,6 +8,12 @@ def calculate_forecast_confidence(
     Calculate a realistic forecast confidence score (percentage) based on
     weather conditions and forecast scope.
     """
+    # Fallback default values if weather data is unavailable (None)
+    if temperature is None:
+        temperature = 25.0
+    if humidity is None:
+        humidity = 50
+
     # Base confidence score depending on the forecast horizon
     if forecast_type == "hourly":
         base_confidence = 97.5

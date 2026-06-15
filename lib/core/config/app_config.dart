@@ -14,7 +14,8 @@ class AppConfig {
     // Development fallbacks
     if (kIsWeb) return 'http://127.0.0.1:8000';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:8000';
+      // Use the active Ngrok tunnel URL for physical device debugging.
+      return 'https://unrecorded-unpretended-loretta.ngrok-free.dev';
     }
     return 'http://127.0.0.1:8000';
   }

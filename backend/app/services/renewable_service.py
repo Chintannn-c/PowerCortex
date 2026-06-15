@@ -1,7 +1,6 @@
 import os
 import logging
 from datetime import timedelta
-import requests
 from bson import ObjectId
 
 from ..core.database import get_database

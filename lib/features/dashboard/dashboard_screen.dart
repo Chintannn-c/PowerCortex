@@ -388,22 +388,33 @@ class DashboardScreen extends StatelessWidget {
     String value,
     IconData icon,
   ) {
+    final isMobile = context.isMobile;
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.7), size: 20),
+        Icon(icon, color: Colors.white.withOpacity(0.7), size: isMobile ? 18 : 20),
         context.sh(6),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: isMobile ? 14 : 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
         context.sh(2),
-        Text(
-          label,
-          style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.6)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: isMobile ? 9 : 11, 
+              color: Colors.white.withOpacity(0.6),
+            ),
+          ),
         ),
       ],
     );
