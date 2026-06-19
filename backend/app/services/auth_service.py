@@ -323,9 +323,8 @@ class AuthService:
 
         user_id_str = str(user["_id"])
         
-        # Generate 6-digit numeric code
-        import random
-        reset_code = str(random.randint(100000, 999999))
+        import secrets
+        reset_code = str(secrets.SystemRandom().randint(100000, 999999))
 
         # Persist code as a short-lived token
         await self._token_repo.create(
