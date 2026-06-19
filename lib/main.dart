@@ -28,19 +28,29 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: String.fromEnvironment('FIREBASE_API_KEY', defaultValue: ''),
-        appId: String.fromEnvironment('FIREBASE_APP_ID', defaultValue: ''),
-        messagingSenderId: String.fromEnvironment('FIREBASE_SENDER_ID', defaultValue: ''),
-        projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
-      ),
-    );
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: String.fromEnvironment('FIREBASE_API_KEY', defaultValue: ''),
+          appId: String.fromEnvironment('FIREBASE_APP_ID', defaultValue: ''),
+          messagingSenderId: String.fromEnvironment('FIREBASE_SENDER_ID', defaultValue: ''),
+          projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
+        ),
+      );
+    }
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     firebaseAvailable = true;
   } catch (e) {
-    debugPrint("Firebase initialization failed: $e — push notifications disabled.");
-    firebaseAvailable = false;
+    if (e.toString().contains('duplicate-app') || e.toString().contains('already exists')) {
+      debugPrint("Firebase already initialized (duplicate-app) — keeping push notifications enabled.");
+      try {
+        FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      } catch (_) {}
+      firebaseAvailable = true;
+    } else {
+      debugPrint("Firebase initialization failed: $e — push notifications disabled.");
+      firebaseAvailable = false;
+    }
   }
   const storage = FlutterSecureStorage();
   final themeStr = await storage.read(key: 'theme_mode');

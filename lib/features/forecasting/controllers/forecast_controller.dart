@@ -31,7 +31,7 @@ class ForecastController extends GetxController {
     fetchData();
   }
 
-  Future<void> fetchData() async {
+  Future<void> fetchData({int retryCount = 0}) async {
     isLoading.value = true;
     errorMessage.value = '';
 
@@ -44,6 +44,12 @@ class ForecastController extends GetxController {
       if (summaryResult != null) {
         summary.value = summaryResult;
       } else {
+        // Retry up to 3 times with increasing delay
+        if (retryCount < 3) {
+          isLoading.value = true;
+          await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+          return fetchData(retryCount: retryCount + 1);
+        }
         errorMessage.value = 'Failed to load forecast KPIs';
       }
 
@@ -53,6 +59,11 @@ class ForecastController extends GetxController {
       // Fetch renewable forecasting data
       await fetchRenewableData();
     } catch (e) {
+      // Retry up to 3 times on exception
+      if (retryCount < 3) {
+        await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+        return fetchData(retryCount: retryCount + 1);
+      }
       errorMessage.value = 'Error connecting to forecasting servers';
     } finally {
       isLoading.value = false;

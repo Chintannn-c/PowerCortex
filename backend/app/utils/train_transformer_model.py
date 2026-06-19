@@ -9,11 +9,12 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Input
 
+
 def train_model():
     logger.info("Generating synthetic transformer telemetry data...")
     np.random.seed(42)
     n_samples = 5000
-    
+
     # Generate realistic features
     temperature = np.random.uniform(40.0, 110.0, n_samples)
     voltage = np.random.uniform(9.5, 12.5, n_samples)

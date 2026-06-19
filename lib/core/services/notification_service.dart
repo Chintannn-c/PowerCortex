@@ -68,6 +68,9 @@ class NotificationService extends GetxController {
   static const int _wsBaseDelaySeconds = 2;
   static const int _wsMaxDelaySeconds = 30;
 
+  /// Track recently processed notification IDs to prevent duplicates
+  final Set<String> _processedNotificationIds = {};
+
   @override
   void onInit() {
     super.onInit();
@@ -119,16 +122,36 @@ class NotificationService extends GetxController {
     // Handle foreground notifications
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("Foreground FCM message received: ${message.messageId}");
+      
+      final String notifId = message.data['id'] ?? '';
+      final title = message.notification?.title ?? "Grid Alert";
+      final body = message.notification?.body ?? "";
+
+      // Deduplicate notifications
+      if (notifId.isNotEmpty) {
+        if (_processedNotificationIds.contains(notifId)) {
+          debugPrint("FCM: Notification $notifId already processed. Skipping duplicate.");
+          return;
+        }
+        _processedNotificationIds.add(notifId);
+      }
+
+      // Skip displaying empty notifications
+      if (title.trim().isEmpty || body.trim().isEmpty) {
+        debugPrint("FCM: Skipping notification because title or body is empty. Title: '$title', Body: '$body'");
+        return;
+      }
+
       final payloadData = {
-        'id': message.data['id'] ?? '',
+        'id': notifId,
         'screen': message.data['screen'] ?? '',
         'entity_id': message.data['entity_id'] ?? '',
         'type': message.data['type'] ?? '',
       };
       showLocalNotification(
         id: message.hashCode,
-        title: message.notification?.title ?? "Grid Alert",
-        body: message.notification?.body ?? "",
+        title: title,
+        body: body,
         payload: jsonEncode(payloadData),
       );
     });
@@ -183,6 +206,11 @@ class NotificationService extends GetxController {
     required String body,
     required String payload,
   }) async {
+    // Skip empty notifications
+    if (title.trim().isEmpty || body.trim().isEmpty) {
+      debugPrint("Skipping local notification because title or body is empty. Title: '$title', Body: '$body'");
+      return;
+    }
     const List<AndroidNotificationAction> actions = [
       AndroidNotificationAction('acknowledge', 'Acknowledge', showsUserInterface: true),
       AndroidNotificationAction('dispatch', 'Dispatch Crew', showsUserInterface: true),
@@ -252,9 +280,26 @@ class NotificationService extends GetxController {
             final data = jsonDecode(message);
             final notif = NotificationModel.fromJson(data);
             
-            // Insert into the local reactive notifications list
-            notifications.insert(0, notif);
-            _updateUnreadCount();
+            // Skip empty notifications
+            if (notif.title.trim().isEmpty || notif.message.trim().isEmpty) {
+              debugPrint("WebSocket: Skipping empty notification. Title: '${notif.title}', Message: '${notif.message}'");
+              return;
+            }
+
+            // Deduplicate notifications
+            if (notif.id.isNotEmpty) {
+              if (_processedNotificationIds.contains(notif.id)) {
+                debugPrint("WebSocket: Notification ${notif.id} already processed. Skipping duplicate.");
+                return;
+              }
+              _processedNotificationIds.add(notif.id);
+            }
+
+            // Insert into the local reactive notifications list (avoiding duplicate UI entries)
+            if (!notifications.any((n) => n.id == notif.id)) {
+              notifications.insert(0, notif);
+              _updateUnreadCount();
+            }
 
              // Display dynamic local alert with action buttons
             showLocalNotification(
@@ -304,17 +349,25 @@ class NotificationService extends GetxController {
     Future.delayed(Duration(seconds: delay), connectWebSocket);
   }
 
-  Future<void> fetchNotifications() async {
+  Future<void> fetchNotifications({int retryCount = 0}) async {
     isLoading.value = true;
     try {
       final response = await _api.get('/api/v1/notifications/');
       if (response.statusCode == 200) {
         final List data = response.data;
-        notifications.value = data.map((e) => NotificationModel.fromJson(e)).toList();
+        notifications.value = data
+            .map((e) => NotificationModel.fromJson(e))
+            .where((n) => n.title.trim().isNotEmpty && n.message.trim().isNotEmpty)
+            .toList();
         _updateUnreadCount();
       }
     } catch (e) {
-      debugPrint('Error fetching notifications: $e');
+      debugPrint('Error fetching notifications (attempt ${retryCount + 1}): $e');
+      // Retry up to 3 times with increasing delay
+      if (retryCount < 3) {
+        await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+        return fetchNotifications(retryCount: retryCount + 1);
+      }
     } finally {
       isLoading.value = false;
     }

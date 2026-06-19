@@ -308,9 +308,9 @@ class AuthService:
 
     # ── Forgot Password ────────────────────────────────────────
     async def forgot_password(self, email: str) -> dict:
-        """Generate a password-reset token.
+        """Generate a 6-digit password-reset code.
 
-        In production, the token would be sent via email / SMS.
+        In production, the code is sent via email.
         For development, it is returned directly in the response.
         """
         user = await self._user_repo.find_by_email(email.lower().strip())
@@ -318,35 +318,47 @@ class AuthService:
             # Do not reveal whether the email exists
             return {
                 "success": True,
-                "message": "If the email exists, a reset token has been generated",
+                "message": "If the email exists, a reset code has been generated",
             }
 
         user_id_str = str(user["_id"])
-        reset_token = create_refresh_token(
-            {"sub": user_id_str, "email": user["email"], "purpose": "reset"},
-            expires_delta=timedelta(minutes=15),
-        )
+        
+        # Generate 6-digit numeric code
+        import random
+        reset_code = str(random.randint(100000, 999999))
 
-        # Persist as a short-lived refresh token
+        # Persist code as a short-lived token
         await self._token_repo.create(
             {
                 "user_id": user_id_str,
-                "token": reset_token,
+                "token": reset_code,
                 "expires_at": utcnow() + timedelta(minutes=15),
             }
         )
 
         from ..services.email_service import EmailService
-        EmailService.send_reset_token(user["email"], reset_token)
+        EmailService.send_reset_token(user["email"], reset_code)
 
         response = {
             "success": True,
-            "message": "If the email exists, a password reset link has been sent.",
+            "message": "If the email exists, a password reset code has been sent.",
         }
         if settings.DEBUG:
-            response["token"] = reset_token
+            response["token"] = reset_code
             
         return response
+
+    async def verify_reset_token(self, reset_token_str: str) -> dict:
+        """Verify if a password reset code is valid and not expired."""
+        stored = await self._token_repo.find_by_token(reset_token_str.strip())
+        if stored is None:
+            return {"success": False, "message": "Invalid reset code"}
+            
+        if stored.get("expires_at") and stored["expires_at"] < utcnow():
+            await self._token_repo.delete_by_token(reset_token_str.strip())
+            return {"success": False, "message": "Reset code has expired"}
+            
+        return {"success": True, "message": "Code verified successfully"}
 
     # ── Reset Password ─────────────────────────────────────────
     async def reset_password(
@@ -355,15 +367,16 @@ class AuthService:
         new_password: str,
         ip_address: str = "0.0.0.0",
     ) -> dict:
-        """Reset a user's password using a valid reset token."""
-        payload = decode_refresh_token(reset_token_str)
-        if payload is None:
-            return {"success": False, "message": "Invalid or expired reset token"}
-
+        """Reset a user's password using a valid reset code."""
         # Must still be in the DB
-        stored = await self._token_repo.find_by_token(reset_token_str)
+        stored = await self._token_repo.find_by_token(reset_token_str.strip())
         if stored is None:
-            return {"success": False, "message": "Reset token has been used or revoked"}
+            return {"success": False, "message": "Invalid or expired reset code"}
+            
+        # Check expiry
+        if stored.get("expires_at") and stored["expires_at"] < utcnow():
+            await self._token_repo.delete_by_token(reset_token_str.strip())
+            return {"success": False, "message": "Reset code has expired"}
 
         pwd_errors = validate_password_strength(new_password)
         if pwd_errors:
@@ -375,15 +388,15 @@ class AuthService:
 
         from ..utils.helpers import to_object_id
 
-        user_id_str = payload.get("sub", "")
+        user_id_str = stored["user_id"]
         user_oid = to_object_id(user_id_str)
         if user_oid is None:
-            return {"success": False, "message": "Invalid token payload"}
+            return {"success": False, "message": "Invalid user account"}
 
         await self._user_repo.update_password(user_oid, hash_password(new_password))
 
         # Consume the reset token
-        await self._token_repo.delete_by_token(reset_token_str)
+        await self._token_repo.delete_by_token(reset_token_str.strip())
         # Revoke all other refresh tokens
         await self._token_repo.delete_all_for_user(user_id_str)
 

@@ -10,7 +10,7 @@ from sklearn.metrics import classification_report, accuracy_score
 
 def train_model():
     logger.info("Loading fault detection dataset...")
-    # Find dataset path relative to this file
+    # Find dataset path relative to this file.
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     csv_path = os.path.join(base_dir, "data", "Fault Detection Data", "fault detection.csv")
     

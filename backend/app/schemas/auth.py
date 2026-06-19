@@ -48,3 +48,6 @@ class Verify2FARequest(BaseModel):
 class Login2FARequest(BaseModel):
     temp_token: str
     code: str = Field(..., min_length=6, max_length=6)
+
+class VerifyResetCodeRequest(BaseModel):
+    code: str = Field(..., min_length=6, max_length=6)

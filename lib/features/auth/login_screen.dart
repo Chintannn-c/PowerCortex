@@ -90,6 +90,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           title: Text(
@@ -103,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Enter your registered email address to receive password reset instructions.',
+                  'Enter your registered email address to receive a 6-digit verification code.',
                   style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
                 ),
                 const SizedBox(height: 16),
@@ -136,20 +137,258 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (dialogFormKey.currentState!.validate()) {
-                  Navigator.pop(context);
-                  Get.snackbar(
-                    'Code Sent',
-                    'Password reset link sent to ${emailDialogController.text.trim()}',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.info,
-                    colorText: Colors.white,
+                  final email = emailDialogController.text.trim();
+                  Navigator.pop(context); // Close email dialog
+                  
+                  // Show loading dialog/overlay
+                  Get.dialog(
+                    const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+                      ),
+                    ),
+                    barrierDismissible: false,
                   );
+                  
+                  final result = await _authController.forgotPassword(email);
+                  
+                  Get.back(); // Dismiss the loading dialog
+                  
+                  if (result['success'] == true) {
+                    Get.snackbar(
+                      'Code Sent',
+                      'A 6-digit verification code has been sent to $email.',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: AppColors.healthy,
+                      colorText: Colors.white,
+                      borderRadius: 10,
+                      margin: const EdgeInsets.all(16),
+                      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                    );
+                    _showVerifyCodeDialog(email); // Proceed to verification
+                  } else {
+                    Get.snackbar(
+                      'Request Failed',
+                      result['message'] ?? 'Failed to request password reset.',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: AppColors.critical,
+                      colorText: Colors.white,
+                      borderRadius: 10,
+                      margin: const EdgeInsets.all(16),
+                      icon: const Icon(Icons.error_outline, color: Colors.white),
+                    );
+                  }
                 }
               },
               child: Text(
                 'Send Code',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showVerifyCodeDialog(String email) {
+    final codeController = TextEditingController();
+    final dialogFormKey = GlobalKey<FormState>();
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Enter Reset Code',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          content: Form(
+            key: dialogFormKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Please enter the 6-digit verification code sent to $email.',
+                  style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: codeController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 8),
+                  decoration: const InputDecoration(
+                    labelText: 'Verification Code',
+                    counterText: '',
+                    prefixIcon: Icon(Icons.security_outlined, size: 20),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().length != 6) {
+                      return 'Please enter the 6-digit code';
+                    }
+                    if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+                      return 'Code must contain digits only';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: AppColors.lightTextSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (dialogFormKey.currentState!.validate()) {
+                  final code = codeController.text.trim();
+                  Navigator.pop(context); // Close verification dialog
+                  
+                  // Show loading dialog/overlay
+                  Get.dialog(
+                    const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+                      ),
+                    ),
+                    barrierDismissible: false,
+                  );
+                  
+                  final isCodeValid = await _authController.verifyResetCode(code);
+                  
+                  Get.back(); // Dismiss the loading dialog
+                  
+                  if (isCodeValid) {
+                    _showNewPasswordDialog(email, code); // Proceed to password setup
+                  } else {
+                    _showVerifyCodeDialog(email); // Let user try again
+                  }
+                }
+              },
+              child: Text(
+                'Verify Code',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNewPasswordDialog(String email, String code) {
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    final dialogFormKey = GlobalKey<FormState>();
+    final showPassword = false.obs;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'New Password',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          content: Obx(() => Form(
+            key: dialogFormKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Enter a strong new password for your account.',
+                  style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: !showPassword.value,
+                  decoration: InputDecoration(
+                    labelText: 'New Password',
+                    prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        showPassword.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 20,
+                      ),
+                      onPressed: () => showPassword.toggle(),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.length < 8) {
+                      return 'Password must be at least 8 characters';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: confirmPasswordController,
+                  obscureText: !showPassword.value,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm Password',
+                    prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
+                  ),
+                  validator: (value) {
+                    if (value != passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          )),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: AppColors.lightTextSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (dialogFormKey.currentState!.validate()) {
+                  final newPassword = passwordController.text;
+                  Navigator.pop(context); // Close new password dialog
+                  
+                  // Show loading dialog/overlay
+                  Get.dialog(
+                    const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+                      ),
+                    ),
+                    barrierDismissible: false,
+                  );
+                  
+                  final success = await _authController.resetPassword(code, newPassword);
+                  
+                  Get.back(); // Dismiss the loading dialog
+                  
+                  if (!success) {
+                    _showNewPasswordDialog(email, code); // Let user try again on failure
+                  }
+                }
+              },
+              child: Text(
+                'Reset Password',
                 style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
               ),
             ),
@@ -839,8 +1078,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     if (value == null || value.isEmpty) {
                       return 'Password is required';
                     }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                    if (value.length < 8) {
+                      return 'Password must be at least 8 characters';
                     }
                     return null;
                   },

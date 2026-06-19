@@ -167,4 +167,47 @@ class AuthRepository {
       return {'success': false, 'message': 'Network error occurred'};
     }
   }
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await _apiClient.dio.post('/api/v1/auth/forgot-password', data: {
+        'email': email,
+      });
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data is Map) {
+        return e.response?.data;
+      }
+      return {'success': false, 'message': 'Network error occurred'};
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyResetCode(String code) async {
+    try {
+      final response = await _apiClient.dio.post('/api/v1/auth/verify-reset-code', data: {
+        'code': code,
+      });
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data is Map) {
+        return e.response?.data;
+      }
+      return {'success': false, 'message': 'Network error occurred'};
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword(String code, String newPassword) async {
+    try {
+      final response = await _apiClient.dio.post('/api/v1/auth/reset-password', data: {
+        'reset_token': code,
+        'new_password': newPassword,
+      });
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data is Map) {
+        return e.response?.data;
+      }
+      return {'success': false, 'message': 'Network error occurred'};
+    }
+  }
 }

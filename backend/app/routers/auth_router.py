@@ -165,6 +165,23 @@ async def forgot_password(body: ForgotPasswordRequest, request: Request):
     return result
 
 
+# ── POST /api/auth/verify-reset-code ───────────────────────────
+from ..schemas.auth import VerifyResetCodeRequest
+
+@router.post("/verify-reset-code", summary="Verify password reset code")
+@limiter.limit("5/minute")
+async def verify_reset_code(body: VerifyResetCodeRequest, request: Request):
+    db = get_database()
+    service = AuthService(db)
+    result = await service.verify_reset_token(body.code)
+    if not result["success"]:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=result,
+        )
+    return result
+
+
 # ── POST /api/auth/reset-password ──────────────────────────────
 @router.post("/reset-password", summary="Reset password with token")
 @limiter.limit("3/minute")

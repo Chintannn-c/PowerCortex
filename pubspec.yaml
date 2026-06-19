@@ -24,6 +24,7 @@ dependencies:
   firebase_messaging: ^15.0.0
   flutter_local_notifications: ^17.0.0
   web_socket_channel: ^2.4.5
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:

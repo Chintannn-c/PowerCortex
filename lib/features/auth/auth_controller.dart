@@ -59,7 +59,7 @@ class AuthController extends GetxController {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       passwordStrength.value = 'Too Short';
       strengthProgress.value = 0.2;
       strengthColor.value = AppColors.critical;
@@ -462,5 +462,63 @@ class AuthController extends GetxController {
 
   Future<Map<String, dynamic>> get2FACodeForLogin(String tempToken) async {
     return await _authRepository.get2FACodeForLogin(tempToken);
+  }
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    isLoading.value = true;
+    final result = await _authRepository.forgotPassword(email.trim());
+    isLoading.value = false;
+    return result;
+  }
+
+  Future<bool> verifyResetCode(String code) async {
+    isLoading.value = true;
+    final result = await _authRepository.verifyResetCode(code.trim());
+    isLoading.value = false;
+    if (result['success'] != true) {
+      Get.snackbar(
+        'Verification Failed',
+        result['message'] ?? 'Invalid or expired code.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.critical,
+        colorText: Colors.white,
+        borderRadius: 10,
+        margin: const EdgeInsets.all(16),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> resetPassword(String code, String newPassword) async {
+    isLoading.value = true;
+    final result = await _authRepository.resetPassword(code.trim(), newPassword);
+    isLoading.value = false;
+
+    if (result['success'] == true) {
+      Get.snackbar(
+        'Success',
+        result['message'] ?? 'Password reset successfully.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.healthy,
+        colorText: Colors.white,
+        borderRadius: 10,
+        margin: const EdgeInsets.all(16),
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+      );
+      return true;
+    } else {
+      Get.snackbar(
+        'Reset Failed',
+        result['message'] ?? 'Failed to reset password.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.critical,
+        colorText: Colors.white,
+        borderRadius: 10,
+        margin: const EdgeInsets.all(16),
+        icon: const Icon(Icons.error_outline, color: Colors.white),
+      );
+      return false;
+    }
   }
 }

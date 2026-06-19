@@ -14,20 +14,23 @@ class SkeletonAIMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SkeletonShimmer(
-      child: Column(
-        children: [
-          // Assistant welcome message
-          _botBubble(context, 180),
-          context.sh(16),
-          // User message
-          _userBubble(context, 140),
-          context.sh(16),
-          // Assistant response
-          _botBubble(context, 220),
-          context.sh(16),
-          // Typing indicator
-          _typingIndicator(context),
-        ],
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            // Assistant welcome message
+            _botBubble(context, 180),
+            context.sh(16),
+            // User message
+            _userBubble(context, 140),
+            context.sh(16),
+            // Assistant response
+            _botBubble(context, 220),
+            context.sh(16),
+            // Typing indicator
+            _typingIndicator(context),
+          ],
+        ),
       ),
     );
   }

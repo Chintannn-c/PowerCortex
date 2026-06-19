@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 
 class HelpSupportScreen extends StatefulWidget {
@@ -24,6 +25,39 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         });
       }
     });
+  }
+
+  Future<void> _sendSupportEmail() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'powercortexguvnl@gmail.com',
+      queryParameters: {
+        'subject': 'PowerCortex Support Request',
+      },
+    );
+    try {
+      if (await canLaunchUrl(emailLaunchUri)) {
+        await launchUrl(emailLaunchUri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open default mail client.'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error launching mail client: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -90,7 +124,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             icon: Icons.email_outlined,
             title: 'Email Support',
             subtitle: 'powercortexguvnl@gmail.com',
-            onTap: () {},
+            onTap: _sendSupportEmail,
           ),
           const SizedBox(height: 32),
 
