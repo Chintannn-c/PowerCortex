@@ -32,26 +32,35 @@ class ForecastController extends GetxController {
   }
 
   Future<void> fetchData({int retryCount = 0}) async {
-    isLoading.value = true;
+    // Only set loading on the first attempt, not on retries (prevents UI flicker)
+    if (retryCount == 0) {
+      isLoading.value = true;
+    }
     errorMessage.value = '';
 
     try {
-      // Fetch demand forecasting data
+      // Fetch the critical dashboard summary FIRST (fail-fast pattern).
+      // This is the call that triggers model loading on a cold backend.
       final summaryResult = await _repository.getDashboardSummary();
-      final chartResult = await _repository.getChartData();
-      final historyResult = await _repository.getHistory();
 
       if (summaryResult != null) {
         summary.value = summaryResult;
       } else {
-        // Retry up to 3 times with increasing delay
+        // Retry up to 3 times with increasing delay to allow backend model warm-up
         if (retryCount < 3) {
-          isLoading.value = true;
-          await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+          final delay = Duration(seconds: 3 * (retryCount + 1)); // 3s, 6s, 9s
+          debugPrint('Dashboard summary null – retrying in ${delay.inSeconds}s (attempt ${retryCount + 1}/3)');
+          await Future.delayed(delay);
           return fetchData(retryCount: retryCount + 1);
         }
         errorMessage.value = 'Failed to load forecast KPIs';
+        isLoading.value = false;
+        return;
       }
+
+      // Secondary data fetches (only after summary succeeds)
+      final chartResult = await _repository.getChartData();
+      final historyResult = await _repository.getHistory();
 
       chartPoints.value = chartResult;
       history.value = historyResult;
@@ -59,9 +68,11 @@ class ForecastController extends GetxController {
       // Fetch renewable forecasting data
       await fetchRenewableData();
     } catch (e) {
-      // Retry up to 3 times on exception
+      // Retry up to 3 times on exception (e.g. timeout during cold start)
       if (retryCount < 3) {
-        await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+        final delay = Duration(seconds: 3 * (retryCount + 1));
+        debugPrint('Dashboard fetch exception – retrying in ${delay.inSeconds}s (attempt ${retryCount + 1}/3): $e');
+        await Future.delayed(delay);
         return fetchData(retryCount: retryCount + 1);
       }
       errorMessage.value = 'Error connecting to forecasting servers';
@@ -69,6 +80,7 @@ class ForecastController extends GetxController {
       isLoading.value = false;
     }
   }
+
 
   Future<void> fetchRenewableData() async {
     try {

@@ -44,7 +44,7 @@ def train_model():
     # Set random seeds for reproducibility
     np.random.seed(42)
     tf.random.set_seed(42)
-    
+        
     logger.info("Building Keras Multi-Layer Perceptron (MLP) model...")
     model = Sequential([
         Input(shape=(3,)),

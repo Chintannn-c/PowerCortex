@@ -38,8 +38,34 @@ async def lifespan(app: FastAPI):
     await connect_to_mongo()
     logger.info("MongoDB connected – database: %s", settings.DATABASE_NAME)
     
-    # Models will be lazy-loaded on first inference request to prevent blocking
-    # the async event loop during startup.
+    # Eagerly pre-load all ML models at startup so they are warm and ready
+    # before any API request arrives. This prevents the cold-start timeout
+    # that causes "Failed to load KPI" on fresh logins.
+    logger.info("Pre-loading ML models (this may take a moment)…")
+    try:
+        from .utils.model_loader import ModelLoader
+        import asyncio
+        
+        # Run model loading in a thread pool to avoid blocking the async event loop
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, ModelLoader.load_model)
+        logger.info("✓ Demand LSTM model loaded")
+        
+        await loop.run_in_executor(None, ModelLoader.load_transformer_model)
+        logger.info("✓ Transformer health model loaded")
+        
+        await loop.run_in_executor(None, ModelLoader.load_fault_model)
+        logger.info("✓ Fault detection model loaded")
+        
+        await loop.run_in_executor(None, ModelLoader.load_theft_model)
+        logger.info("✓ Theft detection model loaded")
+        
+        await loop.run_in_executor(None, ModelLoader.load_system_health_model)
+        logger.info("✓ System health model loaded")
+        
+        logger.info("All ML models pre-loaded successfully.")
+    except Exception as e:
+        logger.warning("Some models failed to pre-load (will retry on first request): %s", e)
     
     yield
     logger.info("Shutting down MongoDB connection …")

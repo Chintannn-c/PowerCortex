@@ -27,7 +27,9 @@ class AppConfig {
     return '$scheme://${uri.host}:${uri.port}';
   }
 
-  /// Timeout for API requests
-  static const Duration apiTimeout = Duration(seconds: 15);
-}
+  /// Timeout for API requests (general purpose)
+  static const Duration apiTimeout = Duration(seconds: 30);
 
+  /// Longer timeout for initial dashboard load when backend may be warming up models
+  static const Duration initialLoadTimeout = Duration(seconds: 60);
+}

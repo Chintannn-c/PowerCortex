@@ -24,11 +24,15 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    // Get.put returns the existing instance if already registered (no duplicate onInit).
+    // The ForecastController is the critical one — its fetchData() must succeed
+    // before the dashboard can render KPIs.
     final ForecastController controller = Get.put(ForecastController());
     final TransformerController transformerController = Get.put(TransformerController());
     final FaultController faultController = Get.put(FaultController());
     Get.put(TheftController());
     final InsightsController insightsController = Get.put(InsightsController());
+
 
     return Obx(() {
       if (controller.isLoading.value) {
