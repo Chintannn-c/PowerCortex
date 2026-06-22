@@ -15,13 +15,14 @@ app.dependency_overrides[get_current_user] = lambda: {"_id": "60d5ec4b9b1d8b2d88
 
 class TestTransformerHealthModule(unittest.TestCase):
     
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         # Ensure model is loaded (uses heuristic fallback if file is missing)
         ModelLoader.load_transformer_model()
-        self.client_ctx = TestClient(app)
-        self.client = self.client_ctx.__enter__()
         
-        # Reset and seed collection synchronously using PyMongo to avoid async loop conflicts
+        # Reset and seed collection synchronously using PyMongo
+        # NOTE: settings.DATABASE_NAME is overridden to "powercortex_test"
+        # by conftest.py, so this never touches the production database.
         from pymongo import MongoClient
         from app.core.config import settings
         from datetime import datetime, timezone
@@ -29,7 +30,7 @@ class TestTransformerHealthModule(unittest.TestCase):
         mongo_client = MongoClient(settings.MONGODB_URL)
         db = mongo_client[settings.DATABASE_NAME]
         
-        # Clear transformers collection
+        # Clear test transformers collection
         db.transformers.delete_many({})
         
         # Re-seed the 8 initial assets
@@ -155,8 +156,23 @@ class TestTransformerHealthModule(unittest.TestCase):
             
         mongo_client.close()
 
+    def setUp(self):
+        self.client_ctx = TestClient(app)
+        self.client = self.client_ctx.__enter__()
+
     def tearDown(self):
         self.client_ctx.__exit__(None, None, None)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up the test database collection after all tests."""
+        from pymongo import MongoClient
+        from app.core.config import settings
+        mongo_client = MongoClient(settings.MONGODB_URL)
+        db = mongo_client[settings.DATABASE_NAME]
+        db.transformers.delete_many({})
+        mongo_client.close()
+
 
     def test_predict_endpoint(self):
         print("Testing POST /api/transformers/predict...")

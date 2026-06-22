@@ -67,6 +67,28 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning("Some models failed to pre-load (will retry on first request): %s", e)
     
+    # Auto-seed theft alerts if the collection is nearly empty.
+    # This ensures the Theft Detection UI always has data to display,
+    # even after a database reset or fresh deployment.
+    try:
+        from .core.database import get_database
+        from .repositories.theft_repository import TheftRepository
+        from .services.theft_service import TheftDetectionService
+        
+        db = get_database()
+        theft_count = await db.theft_alerts.count_documents({})
+        if theft_count < 5:
+            logger.info("Theft alerts collection has only %d docs – auto-seeding…", theft_count)
+            settings.ALLOW_DEMO_DATA = True
+            theft_repo = TheftRepository(db)
+            theft_service = TheftDetectionService(theft_repo)
+            await theft_service.seed_initial_theft_alerts()
+            logger.info("✓ Theft alerts auto-seeded successfully.")
+        else:
+            logger.info("Theft alerts collection has %d docs – skipping seed.", theft_count)
+    except Exception as e:
+        logger.warning("Failed to auto-seed theft alerts: %s", e)
+    
     yield
     logger.info("Shutting down MongoDB connection …")
     await close_mongo_connection()

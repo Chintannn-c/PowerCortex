@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [AppColors.darkBlue, AppColors.primaryBlue],
+            colors: [Color.fromARGB(255, 233, 238, 250), Color.fromARGB(255, 224, 230, 247)],
           ),
         ),
         child: AnimatedBuilder(
@@ -91,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen>
                 style: GoogleFonts.poppins(
                   fontSize: 42,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.black,
                   letterSpacing: 2,
                 ),
               ),
@@ -102,7 +102,7 @@ class _SplashScreenState extends State<SplashScreen>
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.black,
                 ),
               ),
               context.sh(48),
@@ -112,9 +112,9 @@ class _SplashScreenState extends State<SplashScreen>
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
-                    backgroundColor: Colors.white.withOpacity(0.15),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.lightBlue.withOpacity(0.8),
+                    backgroundColor: Colors.black.withOpacity(0.15),
+                    valueColor: AlwaysStoppedAnimation<Color>(    
+                      Colors.black.withOpacity(0.8),
                     ),
                     minHeight: 3,
                   ),

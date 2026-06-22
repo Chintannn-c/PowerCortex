@@ -1,6 +1,16 @@
 import pytest
 import asyncio
 from fastapi.testclient import TestClient
+
+# ── Isolate tests from production database ──────────────────────
+# Override DATABASE_NAME BEFORE any app code reads it, so all
+# test-time DB operations target "powercortex_test" instead of the
+# production "powercortex" database.  This prevents destructive
+# setUp/tearDown calls from wiping live data.
+from app.core.config import settings
+settings.DATABASE_NAME = "powercortex_test"
+settings.ALLOW_DEMO_DATA = True          # allow seed helpers in tests
+
 from app.main import app
 
 @pytest.fixture(scope="session")

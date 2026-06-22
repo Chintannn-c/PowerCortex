@@ -20,8 +20,9 @@ class TestTheftDetection(unittest.TestCase):
         # Force model loading if not already loaded
         ModelLoader.load_theft_model()
 
-    def setUp(self):
-        # Reset and seed collection synchronously using PyMongo to avoid async loop conflicts
+        # Reset and seed collection synchronously using PyMongo
+        # NOTE: settings.DATABASE_NAME is overridden to "powercortex_test"
+        # by conftest.py, so this never touches the production database.
         from pymongo import MongoClient
         from app.core.config import settings
         from datetime import datetime, timedelta, timezone
@@ -29,7 +30,7 @@ class TestTheftDetection(unittest.TestCase):
         mongo_client = MongoClient(settings.MONGODB_URL)
         db = mongo_client[settings.DATABASE_NAME]
 
-        # Clear theft_alerts collection
+        # Clear test theft_alerts collection
         db.theft_alerts.delete_many({})
 
         now = datetime.now(timezone.utc)
@@ -51,6 +52,17 @@ class TestTheftDetection(unittest.TestCase):
             "created_at": now - timedelta(hours=1)
         })
         mongo_client.close()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up the test database collection after all tests."""
+        from pymongo import MongoClient
+        from app.core.config import settings
+        mongo_client = MongoClient(settings.MONGODB_URL)
+        db = mongo_client[settings.DATABASE_NAME]
+        db.theft_alerts.delete_many({})
+        mongo_client.close()
+
 
     def test_model_loading(self):
         """Verify the theft detection model and scaler are loaded properly."""
