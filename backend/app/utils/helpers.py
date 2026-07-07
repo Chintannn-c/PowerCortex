@@ -51,8 +51,8 @@ def serialize_doc(doc: dict) -> dict:
 
 
 def utcnow() -> datetime:
-    """Return the current UTC time as a timezone-aware ``datetime``."""
-    return datetime.now(timezone.utc)
+    """Return the current UTC time as a timezone-naive ``datetime``."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 # ── Password strength validation ──────────────────────────────

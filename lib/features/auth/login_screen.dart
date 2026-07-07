@@ -99,33 +99,35 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           content: Form(
             key: dialogFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Enter your registered email address to receive a 6-digit verification code.',
-                  style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: emailDialogController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email Address',
-                    prefixIcon: Icon(Icons.email_outlined, size: 20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Enter your registered email address to receive a 6-digit verification code.',
+                    style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value.trim())) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: emailDialogController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Email Address',
+                      prefixIcon: Icon(Icons.email_outlined, size: 20),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value.trim())) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -154,7 +156,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   
                   final result = await _authController.forgotPassword(email);
                   
-                  Get.back(); // Dismiss the loading dialog
+                  if (Get.isDialogOpen == true) {
+                    Get.back(); // Dismiss the loading dialog
+                  }
                   
                   if (result['success'] == true) {
                     Get.snackbar(
@@ -208,37 +212,39 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           content: Form(
             key: dialogFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Please enter the 6-digit verification code sent to $email.',
-                  style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: codeController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 8),
-                  decoration: const InputDecoration(
-                    labelText: 'Verification Code',
-                    counterText: '',
-                    prefixIcon: Icon(Icons.security_outlined, size: 20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Please enter the 6-digit verification code sent to $email.',
+                    style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().length != 6) {
-                      return 'Please enter the 6-digit code';
-                    }
-                    if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
-                      return 'Code must contain digits only';
-                    }
-                    return null;
-                  },
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: codeController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 8),
+                    decoration: const InputDecoration(
+                      labelText: 'Verification Code',
+                      counterText: '',
+                      prefixIcon: Icon(Icons.security_outlined, size: 20),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().length != 6) {
+                        return 'Please enter the 6-digit code';
+                      }
+                      if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+                        return 'Code must contain digits only';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -267,7 +273,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   
                   final isCodeValid = await _authController.verifyResetCode(code);
                   
-                  Get.back(); // Dismiss the loading dialog
+                  if (Get.isDialogOpen == true) {
+                    Get.back(); // Dismiss the loading dialog
+                  }
                   
                   if (isCodeValid) {
                     _showNewPasswordDialog(email, code); // Proceed to password setup
@@ -304,54 +312,56 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           content: Obx(() => Form(
             key: dialogFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Enter a strong new password for your account.',
-                  style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: passwordController,
-                  obscureText: !showPassword.value,
-                  decoration: InputDecoration(
-                    labelText: 'New Password',
-                    prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        showPassword.value
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        size: 20,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Enter a strong new password for your account.',
+                    style: GoogleFonts.poppins(fontSize: 13, color: AppColors.lightTextSecondary),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: !showPassword.value,
+                    decoration: InputDecoration(
+                      labelText: 'New Password',
+                      prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          showPassword.value
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          size: 20,
+                        ),
+                        onPressed: () => showPassword.toggle(),
                       ),
-                      onPressed: () => showPassword.toggle(),
                     ),
+                    validator: (value) {
+                      if (value == null || value.length < 8) {
+                        return 'Password must be at least 8 characters';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.length < 8) {
-                      return 'Password must be at least 8 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: confirmPasswordController,
-                  obscureText: !showPassword.value,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                    prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: confirmPasswordController,
+                    obscureText: !showPassword.value,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm Password',
+                      prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
+                    ),
+                    validator: (value) {
+                      if (value != passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value != passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
           )),
           actions: [
@@ -380,7 +390,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   
                   final success = await _authController.resetPassword(code, newPassword);
                   
-                  Get.back(); // Dismiss the loading dialog
+                  if (Get.isDialogOpen == true) {
+                    Get.back(); // Dismiss the loading dialog
+                  }
                   
                   if (!success) {
                     _showNewPasswordDialog(email, code); // Let user try again on failure

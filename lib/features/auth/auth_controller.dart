@@ -476,6 +476,9 @@ class AuthController extends GetxController {
     final result = await _authRepository.verifyResetCode(code.trim());
     isLoading.value = false;
     if (result['success'] != true) {
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
       Get.snackbar(
         'Verification Failed',
         result['message'] ?? 'Invalid or expired code.',
@@ -494,6 +497,10 @@ class AuthController extends GetxController {
     isLoading.value = true;
     final result = await _authRepository.resetPassword(code.trim(), newPassword);
     isLoading.value = false;
+
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
 
     if (result['success'] == true) {
       Get.snackbar(
