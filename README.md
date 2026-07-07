@@ -10,20 +10,20 @@ The following diagram illustrates the PowerCortex system architecture, highlight
 
 ```mermaid
 graph TD
-    subgraph Client Layer (Flutter)
+    subgraph "Client Layer (Flutter)"
         A[Mobile Client]
         B[Web Client]
         C[Desktop Client]
     end
 
-    subgraph API Gateway / Backend (FastAPI)
+    subgraph "API Gateway / Backend (FastAPI)"
         D[Version Rewrite Middleware]
         E[Rate Limiter & CORS]
         F[Auth Router]
         G[Analytics / Operations Routers]
     end
 
-    subgraph Services & ML Layer
+    subgraph "Services & ML Layer"
         H[Auth Service]
         I[Email / 2FA Service]
         J[Forecasting Service <br/> LSTM Model]
@@ -31,7 +31,7 @@ graph TD
         L[Transformer Health Service]
     end
 
-    subgraph Persistence Layer
+    subgraph "Persistence Layer"
         M[(MongoDB Database)]
     end
 
